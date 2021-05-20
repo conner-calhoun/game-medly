@@ -2,6 +2,7 @@
  * Main game class
  */
 
+import h2d.Graphics;
 import haxe.ds.Vector;
 import h2d.Text;
 
@@ -17,6 +18,27 @@ class Game extends hxd.App {
 	var time:Float;
 	var curveHeight:Float;
 	var g:h2d.Graphics;
+
+	function drawWavySegment() {}
+
+	/**
+	 * Pretty much copied from the h2d.Graphics api
+	 */
+	function drawCircle(cx:Float, cy:Float, radius:Float, nsegments = 0) {
+		g.lineStyle(1, 0xFF00FF);
+
+		if (nsegments == 0)
+			nsegments = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
+		if (nsegments < 3)
+			nsegments = 3;
+		var angle = Math.PI * 2 / nsegments;
+		for (i in 0...nsegments + 1) {
+			var a = i * angle;
+			g.lineTo(cx + Math.cos(a) * radius, cy + Math.sin(a) * radius);
+		}
+
+		g.endFill();
+	}
 
 	/**
 	 * Called once at startup
@@ -54,6 +76,10 @@ class Game extends hxd.App {
 		g.lineStyle(1, 0xFF00FF);
 		g.lineTo(90, 100);
 		g.curveTo(130, 100 - curveHeight, 170, 100);
+
+		g.endFill();
+
+		drawCircle(250, 250, 50);
 	}
 
 	/**
