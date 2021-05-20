@@ -1,0 +1,5 @@
+-cp src
+-lib heaps
+-js build/index.js
+-main Game
+-debug
