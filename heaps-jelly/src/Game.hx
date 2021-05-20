@@ -45,10 +45,12 @@ class Game extends hxd.App {
 		time += dt;
 		curveHeight = (Math.sin(time) * 100);
 
+		// left segment
 		g.lineStyle(1, 0xFF00FF);
 		g.lineTo(10, 100);
 		g.curveTo(50, 100 + curveHeight, 90, 100);
 
+		// right segment
 		g.lineStyle(1, 0xFF00FF);
 		g.lineTo(90, 100);
 		g.curveTo(130, 100 - curveHeight, 170, 100);
