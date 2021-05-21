@@ -232,31 +232,7 @@ Game.main = function() {
 };
 Game.__super__ = hxd_App;
 Game.prototype = $extend(hxd_App.prototype,{
-	drawCircle: function(cx,cy,radius,nsegments) {
-		if(nsegments == null) {
-			nsegments = 0;
-		}
-		this.g.lineStyle(1,16711935);
-		if(nsegments == 0) {
-			nsegments = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
-		}
-		if(nsegments < 3) {
-			nsegments = 3;
-		}
-		var angle = Math.PI * 2 / nsegments;
-		var _g = 0;
-		var _g1 = nsegments + 1;
-		while(_g < _g1) {
-			var i = _g++;
-			var a = i * angle;
-			var _this = this.g;
-			var x = cx + Math.cos(a) * radius;
-			var y = cy + Math.sin(a) * radius;
-			_this.addVertex(x,y,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + y * _this.mc + _this.mx,x * _this.mb + y * _this.md + _this.my);
-		}
-		this.g.endFill();
-	}
-	,sin: function(x,t,a,f,s) {
+	sin: function(x,t,a,f,s) {
 		return a * Math.sin((x + t * s) / f);
 	}
 	,drawWavyLine: function(startX,startY,len,t) {
@@ -268,15 +244,17 @@ Game.prototype = $extend(hxd_App.prototype,{
 		var _g1 = len;
 		while(_g < _g1) {
 			var _ = _g++;
-			y = 150;
-			y += this.sin(x,t,6,20,35) + this.sin(x,t,7,17,45) + this.sin(x,t,8,15,65);
-			x += dist;
+			y = startY;
+			y += this.sin(x,t,6,20,35) + this.sin(x,t,5,17,45) + this.sin(x,t,4,15,40);
 			this.g.drawCircle(x,y,1);
+			x += dist;
 		}
+		haxe_Log.trace(x,{ fileName : "src/Game.hx", lineNumber : 42, className : "Game", methodName : "drawWavyLine"});
 		this.g.endFill();
 	}
 	,init: function() {
 		hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("og"))));
+		this.s2d.set_scaleMode(h2d_ScaleMode.AutoZoom(320,180));
 		this.g = new h2d_Graphics(this.s2d);
 		this.hello = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
 		this.hello.set_text("Heaps Jelly");
@@ -285,13 +263,12 @@ Game.prototype = $extend(hxd_App.prototype,{
 		_this.x = 5.0;
 		_this.posChanged = true;
 		_this.y = 5.0;
-		this.curveHeight = 0.0;
 		this.time = 0.0;
 	}
 	,update: function(dt) {
 		this.g.clear();
 		this.time += dt;
-		this.drawWavyLine(10,150,500,this.time);
+		this.drawWavyLine(10,90,300,this.time);
 	}
 	,__class__: Game
 });
