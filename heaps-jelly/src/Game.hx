@@ -6,6 +6,7 @@ import h2d.Text;
 abstract Palette(Int) {
 	var Purple = 0x5e315b;
 	var PinkRed = 0xb0305c;
+	var Dark = 0x272736;
 }
 
 class Game extends hxd.App {
@@ -89,10 +90,15 @@ class Game extends hxd.App {
 		g.clear();
 
 		time += dt;
-		drawWavyLine(10, 90, 620, time);
+		// drawWavyLine(10, 90, 620, time);
 
-		drawWavyCircle(400, 230, 90, time);
-		drawWavyCircle(120, 230, 90, time, true);
+		// Draw background
+		g.beginFill(cast(Palette.PinkRed, Int));
+		g.drawRect(0, 0, s2d.width, s2d.height);
+
+		// Draw Circle
+		g.beginFill(cast(Palette.Dark, Int));
+		drawWavyCircle(s2d.width / 2, s2d.height / 2, 120, time);
 	}
 
 	/**

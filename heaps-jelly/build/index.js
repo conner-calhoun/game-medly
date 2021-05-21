@@ -292,9 +292,10 @@ Game.prototype = $extend(hxd_App.prototype,{
 	,update: function(dt) {
 		this.g.clear();
 		this.time += dt;
-		this.drawWavyLine(10,90,620,this.time);
-		this.drawWavyCircle(400,230,90,this.time);
-		this.drawWavyCircle(120,230,90,this.time,true);
+		this.g.beginFill(js_Boot.__cast(11546716 , Int));
+		this.g.drawRect(0,0,this.s2d.width,this.s2d.height);
+		this.g.beginFill(js_Boot.__cast(2565942 , Int));
+		this.drawWavyCircle(this.s2d.width / 2,this.s2d.height / 2,120,this.time);
 	}
 	,__class__: Game
 });
