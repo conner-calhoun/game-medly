@@ -1,9 +1,10 @@
 import h2d.Graphics;
 import h2d.Text;
 
-typedef Node = {
-	x:Float,
-	y:Float
+@:enum
+abstract Palette(Int) {
+	var Purple = 0x5e315b;
+	var PinkRed = 0xb0305c;
 }
 
 class Game extends hxd.App {
@@ -31,16 +32,13 @@ class Game extends hxd.App {
 		var y = startY;
 		var dist = 1;
 
-		g.beginFill(0xFF00FF);
+		g.lineStyle(2, cast(Palette.PinkRed, Int));
 		for (_ in 0...len) {
 			y = startY;
-			y = y + (sin(x, t, 6, 20, 35) + sin(x, t, 5, 17, 45) + sin(x, t, 4, 15, 40));
-			g.drawCircle(x, y, 1);
+			y = y + (sin(x, t, 6, 15, 55) + sin(x, t, 5, 17, 45) + sin(x, t, 4, 15, 40));
+			g.lineTo(x, y);
 			x += dist;
 		}
-
-		trace(x);
-
 		g.endFill();
 	}
 
@@ -50,7 +48,7 @@ class Game extends hxd.App {
 	override function init() {
 		// for loading sprites
 		hxd.Res.initEmbed();
-		s2d.scaleMode = AutoZoom(320, 180);
+		s2d.scaleMode = AutoZoom(640, 360);
 
 		g = new h2d.Graphics(s2d);
 
@@ -68,7 +66,7 @@ class Game extends hxd.App {
 		g.clear();
 
 		time += dt;
-		drawWavyLine(10, 90, 300, time);
+		drawWavyLine(10, 90, 620, time);
 	}
 
 	/**

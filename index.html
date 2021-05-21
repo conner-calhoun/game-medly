@@ -9,8 +9,10 @@
     <title>Game Medly</title>
 </head>
 <body>
-    <h1>Game Medly</h1>
-    <iframe src="./heaps-jelly/index.html" width="1280" height="720" frameborder="0" scrolling="no"></iframe>
+    <h1 class="title">Game Medly</h1>
+    <div class="frames">
+        <iframe src="./heaps-jelly/index.html" width="1280" height="720" frameborder="0" scrolling="no"></iframe>
+    </div>
 </body>
 
 <style>
@@ -19,11 +21,17 @@
         color: white;
         font-family: 'Space Mono', monospace;
     }
-    ul {
-        list-style-type: none;
-    }
     iframe {
         overflow: hidden;
+    }
+    .title {
+        margin: 10px 100px;
+    }
+    .frames {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
     }
 </style>
 

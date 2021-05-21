@@ -239,22 +239,22 @@ Game.prototype = $extend(hxd_App.prototype,{
 		var x = startX;
 		var y = startY;
 		var dist = 1;
-		this.g.beginFill(16711935);
+		this.g.lineStyle(2,js_Boot.__cast(11546716 , Int));
 		var _g = 0;
 		var _g1 = len;
 		while(_g < _g1) {
 			var _ = _g++;
 			y = startY;
-			y += this.sin(x,t,6,20,35) + this.sin(x,t,5,17,45) + this.sin(x,t,4,15,40);
-			this.g.drawCircle(x,y,1);
+			y += this.sin(x,t,6,15,55) + this.sin(x,t,5,17,45) + this.sin(x,t,4,15,40);
+			var _this = this.g;
+			_this.addVertex(x,y,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + y * _this.mc + _this.mx,x * _this.mb + y * _this.md + _this.my);
 			x += dist;
 		}
-		haxe_Log.trace(x,{ fileName : "src/Game.hx", lineNumber : 42, className : "Game", methodName : "drawWavyLine"});
 		this.g.endFill();
 	}
 	,init: function() {
 		hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("og"))));
-		this.s2d.set_scaleMode(h2d_ScaleMode.AutoZoom(320,180));
+		this.s2d.set_scaleMode(h2d_ScaleMode.AutoZoom(640,360));
 		this.g = new h2d_Graphics(this.s2d);
 		this.hello = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
 		this.hello.set_text("Heaps Jelly");
@@ -268,7 +268,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 	,update: function(dt) {
 		this.g.clear();
 		this.time += dt;
-		this.drawWavyLine(10,90,300,this.time);
+		this.drawWavyLine(10,90,620,this.time);
 	}
 	,__class__: Game
 });
