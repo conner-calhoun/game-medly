@@ -232,7 +232,50 @@ Game.main = function() {
 };
 Game.__super__ = hxd_App;
 Game.prototype = $extend(hxd_App.prototype,{
-	init: function() {
+	drawCircle: function(cx,cy,radius,nsegments) {
+		if(nsegments == null) {
+			nsegments = 0;
+		}
+		this.g.lineStyle(1,16711935);
+		if(nsegments == 0) {
+			nsegments = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
+		}
+		if(nsegments < 3) {
+			nsegments = 3;
+		}
+		var angle = Math.PI * 2 / nsegments;
+		var _g = 0;
+		var _g1 = nsegments + 1;
+		while(_g < _g1) {
+			var i = _g++;
+			var a = i * angle;
+			var _this = this.g;
+			var x = cx + Math.cos(a) * radius;
+			var y = cy + Math.sin(a) * radius;
+			_this.addVertex(x,y,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + y * _this.mc + _this.mx,x * _this.mb + y * _this.md + _this.my);
+		}
+		this.g.endFill();
+	}
+	,sin: function(x,t,a,f,s) {
+		return a * Math.sin((x + t * s) / f);
+	}
+	,drawWavyLine: function(startX,startY,len,t) {
+		var x = startX;
+		var y = startY;
+		var dist = 1;
+		this.g.beginFill(16711935);
+		var _g = 0;
+		var _g1 = len;
+		while(_g < _g1) {
+			var _ = _g++;
+			y = 150;
+			y += this.sin(x,t,6,20,35) + this.sin(x,t,7,17,45) + this.sin(x,t,8,15,65);
+			x += dist;
+			this.g.drawCircle(x,y,1);
+		}
+		this.g.endFill();
+	}
+	,init: function() {
 		hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("og"))));
 		this.g = new h2d_Graphics(this.s2d);
 		this.hello = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
@@ -248,15 +291,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 	,update: function(dt) {
 		this.g.clear();
 		this.time += dt;
-		this.curveHeight = Math.sin(this.time) * 100;
-		this.g.lineStyle(1,16711935);
-		var _this = this.g;
-		_this.addVertex(10,100,_this.curR,_this.curG,_this.curB,_this.curA,10 * _this.ma + 100 * _this.mc + _this.mx,10 * _this.mb + 100 * _this.md + _this.my);
-		this.g.curveTo(50,100 + this.curveHeight,90,100);
-		this.g.lineStyle(1,16711935);
-		var _this = this.g;
-		_this.addVertex(90,100,_this.curR,_this.curG,_this.curB,_this.curA,90 * _this.ma + 100 * _this.mc + _this.mx,90 * _this.mb + 100 * _this.md + _this.my);
-		this.g.curveTo(130,100 - this.curveHeight,170,100);
+		this.drawWavyLine(10,150,500,this.time);
 	}
 	,__class__: Game
 });
