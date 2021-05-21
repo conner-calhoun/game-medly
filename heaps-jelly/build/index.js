@@ -232,55 +232,47 @@ Game.main = function() {
 };
 Game.__super__ = hxd_App;
 Game.prototype = $extend(hxd_App.prototype,{
-	sin: function(x,t,a,f,s) {
-		return a * Math.sin((x + t * s) / f);
+	sin: function(time,angle,speed,freq,amp) {
+		return Math.sin(time * speed + angle * freq) * amp;
 	}
-	,cos: function(x,t,a,f,s) {
-		return a * Math.cos((x + t * s) / f);
-	}
-	,drawWavyLine: function(startX,startY,len,t) {
+	,drawWavyLine: function(startX,y,len,t) {
 		var x = startX;
-		var y = startY;
-		var dist = 1;
 		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
 		var _g = 0;
 		var _g1 = len;
 		while(_g < _g1) {
-			var _ = _g++;
-			y = startY;
-			y += this.sin(x,t,6,15,55) + this.sin(x,t,5,17,45) + this.sin(x,t,4,15,40);
+			var i = _g++;
+			var dx = x + i;
+			var sinSum = this.sin(t,i / len,1.2,25,5) + this.sin(t,i / len,3.1,20,4) + this.sin(t,i / len,2.2,32,7);
+			var dy = y + sinSum;
 			var _this = this.g;
-			_this.addVertex(x,y,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + y * _this.mc + _this.mx,x * _this.mb + y * _this.md + _this.my);
-			x += dist;
+			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
 		}
 		this.g.endFill();
 	}
-	,drawWavyCircle: function(startX,startY,radius,t) {
-		var nsegs = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
+	,drawWavyCircle: function(x,y,r,t,fill) {
+		if(fill == null) {
+			fill = false;
+		}
+		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2));
 		if(nsegs < 3) {
 			nsegs = 3;
 		}
 		var angle = Math.PI * 2 / nsegs;
-		var dist = 0;
 		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
+		if(fill) {
+			this.g.beginFill(11546716);
+		}
 		var _g = 0;
 		var _g1 = nsegs + 1;
 		while(_g < _g1) {
 			var i = _g++;
 			var a = i * angle;
-			var x = startX;
-			var y = startY;
-			x = y + this.sin(y + dist,t,5,5,5);
-			y = x + this.sin(x - dist,t,5,5,5);
-			if(i >= nsegs / 2) {
-				--dist;
-			} else {
-				++dist;
-			}
+			var sinSum = this.sin(t,a,2,5,5) + this.sin(t,a,3,12,3) + this.sin(t,a,2,10,8);
+			var dx = x + (r + sinSum) * Math.cos(a);
+			var dy = y + (r + sinSum) * Math.sin(a);
 			var _this = this.g;
-			var x1 = x + Math.cos(a) * radius;
-			var y1 = y + Math.sin(a) * radius;
-			_this.addVertex(x1,y1,_this.curR,_this.curG,_this.curB,_this.curA,x1 * _this.ma + y1 * _this.mc + _this.mx,x1 * _this.mb + y1 * _this.md + _this.my);
+			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
 		}
 		this.g.endFill();
 	}
@@ -301,7 +293,8 @@ Game.prototype = $extend(hxd_App.prototype,{
 		this.g.clear();
 		this.time += dt;
 		this.drawWavyLine(10,90,620,this.time);
-		this.drawWavyCircle(200,250,75,this.time);
+		this.drawWavyCircle(400,230,90,this.time);
+		this.drawWavyCircle(120,230,90,this.time,true);
 	}
 	,__class__: Game
 });

@@ -15,71 +15,52 @@ class Game extends hxd.App {
 	var time:Float;
 	var g:h2d.Graphics;
 
-	/**
-	 * Calculate a sine wave over time
-	 * @param x X Coordinate
-	 * @param t Time Value
-	 * @param a Amplitude
-	 * @param f Frequency
-	 * @param s Speed
-	 * @return Float Y Value
-	 */
-	function sin(x:Float, t:Float, a:Int, f:Int, s:Int):Float {
-		return (a * Math.sin((x + t * s) / f));
-	}
-
-	/**
-	 * Calculate a cosine wave over time
-	 * @param x X Coordinate
-	 * @param t Time Value
-	 * @param a Amplitude
-	 * @param f Frequency
-	 * @param s Speed
-	 * @return Float Y Value
-	 */
-	function cos(x:Float, t:Float, a:Float, f:Float, s:Float):Float {
-		return (a * Math.cos((x + t * s) / f));
+	function sin(time:Float, angle:Float, speed:Float, freq:Float, amp:Float):Float {
+		return (Math.sin(time * speed + angle * freq) * amp);
 	}
 
 	// TODO: Make length based on start and end point
-	function drawWavyLine(startX:Float, startY:Float, len:Int, t:Float) {
+	function drawWavyLine(startX:Float, y:Float, len:Int, t:Float) {
 		var x = startX;
-		var y = startY;
-		var dist = 1;
 
 		g.lineStyle(1, cast(Palette.PinkRed, Int));
-		for (_ in 0...len) {
-			y = startY;
-			y = y + (sin(x, t, 6, 15, 55) + sin(x, t, 5, 17, 45) + sin(x, t, 4, 15, 40));
-			g.lineTo(x, y);
-			x += dist;
+		for (i in 0...len) {
+			var dx = x + i;
+
+			var sinSum = (sin(t, i / len, 1.2, 25, 5) + sin(t, i / len, 3.1, 20, 4) + sin(t, i / len, 2.2, 32, 7));
+			var dy = y + sinSum;
+
+			g.lineTo(dx, dy);
 		}
 		g.endFill();
 	}
 
-	function drawWavyCircle(startX:Float, startY:Float, radius:Float, t:Float) {
-		var nsegs = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
+	/**
+	 * Draws a wavy circle
+	 * @param x X Position
+	 * @param y Y Position
+	 * @param r Radius of circle
+	 * @param t Time elapsed
+	 */
+	function drawWavyCircle(x:Float, y:Float, r:Float, t:Float, fill:Bool = false) {
+		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2));
 		if (nsegs < 3)
 			nsegs = 3;
 
 		var angle = Math.PI * 2 / nsegs;
-		var dist = 0;
 
 		g.lineStyle(1, cast(Palette.PinkRed, Int));
+		if (fill)
+			g.beginFill(cast(Palette.PinkRed));
 		for (i in 0...nsegs + 1) {
 			var a = i * angle;
-			var x = startX;
-			var y = startY;
-			x = y + (sin(y + dist, t, 5, 5, 5));
-			y = x + (sin(x - dist, t, 5, 5, 5));
 
-			if (i >= nsegs / 2) {
-				dist -= 1;
-			} else {
-				dist += 1;
-			}
+			var sinSum = sin(t, a, 2, 5, 5) + sin(t, a, 3, 12, 3) + sin(t, a, 2, 10, 8);
 
-			g.lineTo(x + Math.cos(a) * radius, y + Math.sin(a) * radius);
+			var dx = x + (r + sinSum) * Math.cos(a);
+			var dy = y + (r + sinSum) * Math.sin(a);
+
+			g.lineTo(dx, dy);
 		}
 		g.endFill();
 	}
@@ -110,7 +91,8 @@ class Game extends hxd.App {
 		time += dt;
 		drawWavyLine(10, 90, 620, time);
 
-		drawWavyCircle(200, 250, 75, time);
+		drawWavyCircle(400, 230, 90, time);
+		drawWavyCircle(120, 230, 90, time, true);
 	}
 
 	/**
