@@ -1,3 +1,4 @@
+import h3d.Vector;
 import h2d.Graphics;
 import h2d.Text;
 
@@ -27,17 +28,58 @@ class Game extends hxd.App {
 		return (a * Math.sin((x + t * s) / f));
 	}
 
+	/**
+	 * Calculate a cosine wave over time
+	 * @param x X Coordinate
+	 * @param t Time Value
+	 * @param a Amplitude
+	 * @param f Frequency
+	 * @param s Speed
+	 * @return Float Y Value
+	 */
+	function cos(x:Float, t:Float, a:Float, f:Float, s:Float):Float {
+		return (a * Math.cos((x + t * s) / f));
+	}
+
+	// TODO: Make length based on start and end point
 	function drawWavyLine(startX:Float, startY:Float, len:Int, t:Float) {
 		var x = startX;
 		var y = startY;
 		var dist = 1;
 
-		g.lineStyle(2, cast(Palette.PinkRed, Int));
+		g.lineStyle(1, cast(Palette.PinkRed, Int));
 		for (_ in 0...len) {
 			y = startY;
 			y = y + (sin(x, t, 6, 15, 55) + sin(x, t, 5, 17, 45) + sin(x, t, 4, 15, 40));
 			g.lineTo(x, y);
 			x += dist;
+		}
+		g.endFill();
+	}
+
+	function drawWavyCircle(startX:Float, startY:Float, radius:Float, t:Float) {
+		var nsegs = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
+		if (nsegs < 3)
+			nsegs = 3;
+
+		var angle = Math.PI * 2 / nsegs;
+		var dist = 0;
+
+		g.lineStyle(1, cast(Palette.PinkRed, Int));
+		for (i in 0...nsegs + 1) {
+			var a = i * angle;
+			var x = startX;
+			var y = startY;
+			x = y + (sin(y + dist, t, 5, 5, 5));
+			y = x + (sin(x - dist, t, 5, 5, 5));
+
+			if (i >= nsegs / 2) {
+				dist -= 1;
+			} else {
+				dist += 1;
+			}
+
+			g.lineTo(x + Math.cos(a) * radius, y + Math.sin(a) * radius);
 		}
 		g.endFill();
 	}
@@ -67,6 +109,8 @@ class Game extends hxd.App {
 
 		time += dt;
 		drawWavyLine(10, 90, 620, time);
+
+		drawWavyCircle(200, 250, 75, time);
 	}
 
 	/**

@@ -235,11 +235,14 @@ Game.prototype = $extend(hxd_App.prototype,{
 	sin: function(x,t,a,f,s) {
 		return a * Math.sin((x + t * s) / f);
 	}
+	,cos: function(x,t,a,f,s) {
+		return a * Math.cos((x + t * s) / f);
+	}
 	,drawWavyLine: function(startX,startY,len,t) {
 		var x = startX;
 		var y = startY;
 		var dist = 1;
-		this.g.lineStyle(2,js_Boot.__cast(11546716 , Int));
+		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
 		var _g = 0;
 		var _g1 = len;
 		while(_g < _g1) {
@@ -249,6 +252,35 @@ Game.prototype = $extend(hxd_App.prototype,{
 			var _this = this.g;
 			_this.addVertex(x,y,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + y * _this.mc + _this.mx,x * _this.mb + y * _this.md + _this.my);
 			x += dist;
+		}
+		this.g.endFill();
+	}
+	,drawWavyCircle: function(startX,startY,radius,t) {
+		var nsegs = Math.ceil(Math.abs(radius * 3.14 * 2 / 4));
+		if(nsegs < 3) {
+			nsegs = 3;
+		}
+		var angle = Math.PI * 2 / nsegs;
+		var dist = 0;
+		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
+		var _g = 0;
+		var _g1 = nsegs + 1;
+		while(_g < _g1) {
+			var i = _g++;
+			var a = i * angle;
+			var x = startX;
+			var y = startY;
+			x = y + this.sin(y + dist,t,5,5,5);
+			y = x + this.sin(x - dist,t,5,5,5);
+			if(i >= nsegs / 2) {
+				--dist;
+			} else {
+				++dist;
+			}
+			var _this = this.g;
+			var x1 = x + Math.cos(a) * radius;
+			var y1 = y + Math.sin(a) * radius;
+			_this.addVertex(x1,y1,_this.curR,_this.curG,_this.curB,_this.curA,x1 * _this.ma + y1 * _this.mc + _this.mx,x1 * _this.mb + y1 * _this.md + _this.my);
 		}
 		this.g.endFill();
 	}
@@ -269,6 +301,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 		this.g.clear();
 		this.time += dt;
 		this.drawWavyLine(10,90,620,this.time);
+		this.drawWavyCircle(200,250,75,this.time);
 	}
 	,__class__: Game
 });
