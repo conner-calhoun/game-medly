@@ -11,6 +11,9 @@
 		},
 		{
 			"path": "."
+		},
+		{
+			"path": "mypico8"
 		}
 	],
 	"settings": {}
