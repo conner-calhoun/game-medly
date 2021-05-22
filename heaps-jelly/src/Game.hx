@@ -7,6 +7,8 @@ abstract Palette(Int) {
 	var Purple = 0x5e315b;
 	var PinkRed = 0xb0305c;
 	var Dark = 0x272736;
+	var LightBlue = 0x66ffe3;
+	var Blue = 0x4da6ff;
 }
 
 class Game extends hxd.App {
@@ -44,7 +46,7 @@ class Game extends hxd.App {
 	 * @param t Time elapsed
 	 */
 	function drawWavyCircle(x:Float, y:Float, r:Float, t:Float, fill:Bool = false) {
-		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2));
+		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2) / 4);
 		if (nsegs < 3)
 			nsegs = 3;
 
@@ -63,6 +65,33 @@ class Game extends hxd.App {
 
 			g.lineTo(dx, dy);
 		}
+		g.endFill();
+	}
+
+	function drawWater(x:Int, y:Int, w:Int, h:Int) {
+		g.beginFill(cast(Palette.Blue, Int));
+		g.lineStyle(1, cast(Palette.LightBlue, Int));
+
+		var len = x + w;
+		var startY = 0.0;
+
+		for (i in x...len + 1) {
+			var dx = i;
+
+			var sinSum = (sin(time, i / len, 1.2, 12, 1.23) + sin(time, i / len, 3.1, 30, 0.75) + sin(time, i / len, 7, 10, 1.0));
+
+			var dy = y + sinSum;
+
+			if (dx == x)
+				startY = dy;
+
+			g.lineTo(dx, dy);
+		}
+
+		g.lineTo(len, y + h); // bottom right
+		g.lineTo(x, y + h); // bottom left
+		g.lineTo(x, startY); // to start
+
 		g.endFill();
 	}
 
@@ -99,6 +128,8 @@ class Game extends hxd.App {
 		// Draw Circle
 		g.beginFill(cast(Palette.Dark, Int));
 		drawWavyCircle(s2d.width / 2, s2d.height / 2, 120, time);
+
+		drawWater(10, 30, 150, 150);
 	}
 
 	/**

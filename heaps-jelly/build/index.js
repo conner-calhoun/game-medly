@@ -254,7 +254,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 		if(fill == null) {
 			fill = false;
 		}
-		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2));
+		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2) / 4);
 		if(nsegs < 3) {
 			nsegs = 3;
 		}
@@ -274,6 +274,34 @@ Game.prototype = $extend(hxd_App.prototype,{
 			var _this = this.g;
 			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
 		}
+		this.g.endFill();
+	}
+	,drawWater: function(x,y,w,h) {
+		this.g.beginFill(js_Boot.__cast(5089023 , Int));
+		this.g.lineStyle(1,js_Boot.__cast(6750179 , Int));
+		var len = x + w;
+		var startY = 0.0;
+		var _g = x;
+		var _g1 = len + 1;
+		while(_g < _g1) {
+			var i = _g++;
+			var dx = i;
+			var sinSum = this.sin(this.time,i / len,1.2,12,1.23) + this.sin(this.time,i / len,3.1,30,0.75) + this.sin(this.time,i / len,7,10,1.0);
+			var dy = y + sinSum;
+			if(dx == x) {
+				startY = dy;
+			}
+			var _this = this.g;
+			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
+		}
+		var _this = this.g;
+		var y1 = y + h;
+		_this.addVertex(len,y1,_this.curR,_this.curG,_this.curB,_this.curA,len * _this.ma + y1 * _this.mc + _this.mx,len * _this.mb + y1 * _this.md + _this.my);
+		var _this = this.g;
+		var y1 = y + h;
+		_this.addVertex(x,y1,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + y1 * _this.mc + _this.mx,x * _this.mb + y1 * _this.md + _this.my);
+		var _this = this.g;
+		_this.addVertex(x,startY,_this.curR,_this.curG,_this.curB,_this.curA,x * _this.ma + startY * _this.mc + _this.mx,x * _this.mb + startY * _this.md + _this.my);
 		this.g.endFill();
 	}
 	,init: function() {
@@ -296,6 +324,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 		this.g.drawRect(0,0,this.s2d.width,this.s2d.height);
 		this.g.beginFill(js_Boot.__cast(2565942 , Int));
 		this.drawWavyCircle(this.s2d.width / 2,this.s2d.height / 2,120,this.time);
+		this.drawWater(10,30,150,150);
 	}
 	,__class__: Game
 });
