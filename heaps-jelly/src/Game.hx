@@ -1,6 +1,7 @@
 import h3d.Vector;
 import h2d.Graphics;
 import h2d.Text;
+import Water;
 
 @:enum
 abstract Palette(Int) {
@@ -68,32 +69,7 @@ class Game extends hxd.App {
 		g.endFill();
 	}
 
-	function drawWater(x:Int, y:Int, w:Int, h:Int) {
-		g.beginFill(cast(Palette.Blue, Int));
-		g.lineStyle(1, cast(Palette.LightBlue, Int));
-
-		var len = x + w;
-		var startY = 0.0;
-
-		for (i in x...len + 1) {
-			var dx = i;
-
-			var sinSum = (sin(time, i / len, 1.2, 12, 1.23) + sin(time, i / len, 3.1, 30, 0.75) + sin(time, i / len, 7, 10, 1.0));
-
-			var dy = y + sinSum;
-
-			if (dx == x)
-				startY = dy;
-
-			g.lineTo(dx, dy);
-		}
-
-		g.lineTo(len, y + h); // bottom right
-		g.lineTo(x, y + h); // bottom left
-		g.lineTo(x, startY); // to start
-
-		g.endFill();
-	}
+	var water:Water;
 
 	/**
 	 * Called once at startup
@@ -101,7 +77,7 @@ class Game extends hxd.App {
 	override function init() {
 		// for loading sprites
 		hxd.Res.initEmbed();
-		s2d.scaleMode = AutoZoom(640, 360);
+		s2d.scaleMode = LetterBox(640, 360);
 
 		g = new h2d.Graphics(s2d);
 
@@ -109,6 +85,9 @@ class Game extends hxd.App {
 		hello.text = "Heaps Jelly";
 		hello.setPosition(5.0, 5.0);
 		time = 0.0;
+
+		water = new Water(s2d);
+		water.init();
 	}
 
 	/**
@@ -127,9 +106,9 @@ class Game extends hxd.App {
 
 		// Draw Circle
 		g.beginFill(cast(Palette.Dark, Int));
-		drawWavyCircle(s2d.width / 2, s2d.height / 2, 120, time);
+		drawWavyCircle(s2d.width / 2, 150, 120, time);
 
-		drawWater(10, 30, 150, 150);
+		water.update(dt, 0, s2d.height - 50, s2d.width, 50);
 	}
 
 	/**
