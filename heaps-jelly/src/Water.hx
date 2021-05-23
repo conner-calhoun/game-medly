@@ -18,7 +18,7 @@ class Water extends h2d.Object {
 		for (i in x...len + 1) {
 			var dx = i;
 
-			var sinSum = (sin(time, i / len, 1.2, 12, 1.23) + sin(time, i / len, 3.1, 30, 0.75) + sin(time, i / len, 2.1, 10, 1.0));
+			var sinSum = (sin(time, i / len, 1.2, 12, 1.23) + sin(-time, i / len, 3.1, 30, 0.75) + sin(time, i / len, 2.1, 10, 1.0));
 
 			var dy = y + sinSum;
 

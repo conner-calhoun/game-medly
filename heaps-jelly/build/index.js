@@ -271,7 +271,7 @@ Game.prototype = $extend(hxd_App.prototype,{
 		while(_g < _g1) {
 			var i = _g++;
 			var a = i * angle;
-			var sinSum = this.sin(t,a,2,5,5) + this.sin(t,a,3,12,3) + this.sin(t,a,2,10,8);
+			var sinSum = this.sin(t,a,2,5,5) + this.sin(-t,a,3,12,3) + this.sin(t,a,2,10,8);
 			var dx = x + (r + sinSum) * Math.cos(a);
 			var dy = y + (r + sinSum) * Math.sin(a);
 			var _this = this.g;
@@ -1860,7 +1860,7 @@ Water.prototype = $extend(h2d_Object.prototype,{
 		while(_g < _g1) {
 			var i = _g++;
 			var dx = i;
-			var sinSum = this.sin(this.time,i / len,1.2,12,1.23) + this.sin(this.time,i / len,3.1,30,0.75) + this.sin(this.time,i / len,2.1,10,1.0);
+			var sinSum = this.sin(this.time,i / len,1.2,12,1.23) + this.sin(-this.time,i / len,3.1,30,0.75) + this.sin(this.time,i / len,2.1,10,1.0);
 			var dy = y + sinSum;
 			if(dx == x) {
 				sy = dy;

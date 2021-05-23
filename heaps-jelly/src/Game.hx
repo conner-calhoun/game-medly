@@ -59,7 +59,7 @@ class Game extends hxd.App {
 		for (i in 0...nsegs + 1) {
 			var a = i * angle;
 
-			var sinSum = sin(t, a, 2, 5, 5) + sin(t, a, 3, 12, 3) + sin(t, a, 2, 10, 8);
+			var sinSum = sin(t, a, 2, 5, 5) + sin(-t, a, 3, 12, 3) + sin(t, a, 2, 10, 8);
 
 			var dx = x + (r + sinSum) * Math.cos(a);
 			var dy = y + (r + sinSum) * Math.sin(a);
