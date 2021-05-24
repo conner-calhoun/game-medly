@@ -1,12 +1,9 @@
 import Constants;
+import JellyMath;
 
 class Water extends h2d.Object {
 	var time:Float;
 	var g:h2d.Graphics;
-
-	function sin(time:Float, step:Float, speed:Float, freq:Float, amp:Float):Float {
-		return (Math.sin(time * speed + step * freq) * amp);
-	}
 
 	function drawWater(x:Int, y:Int, w:Int, h:Int) {
 		g.beginFill(Constants.Palette.Blue);
@@ -18,7 +15,8 @@ class Water extends h2d.Object {
 		for (i in x...len + 1) {
 			var dx = i;
 
-			var sinSum = (sin(time, i / len, 1.2, 12, 1.23) + sin(-time, i / len, 3.1, 30, 0.75) + sin(time, i / len, 2.1, 10, 1.0));
+			var sinSum = (JellyMath.sin(time, i / len, 1.2, 12, 1.23) + JellyMath.sin(-time, i / len, 3.1, 30, 0.75)
+				+ JellyMath.sin(time, i / len, 2.1, 10, 1.0));
 
 			var dy = y + sinSum;
 
@@ -33,10 +31,6 @@ class Water extends h2d.Object {
 		g.lineTo(x, sy); // to start
 
 		g.endFill();
-	}
-
-	public function new(?parent:h2d.Object) {
-		super(parent);
 	}
 
 	public function init() {

@@ -2,6 +2,7 @@ import h3d.Vector;
 import h2d.Graphics;
 import h2d.Text;
 import Water;
+import Bubble;
 
 @:enum
 abstract Palette(Int) {
@@ -39,37 +40,8 @@ class Game extends hxd.App {
 		g.endFill();
 	}
 
-	/**
-	 * Draws a wavy circle
-	 * @param x X Position
-	 * @param y Y Position
-	 * @param r Radius of circle
-	 * @param t Time elapsed
-	 */
-	function drawWavyCircle(x:Float, y:Float, r:Float, t:Float, fill:Bool = false) {
-		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2) / 4);
-		if (nsegs < 3)
-			nsegs = 3;
-
-		var angle = Math.PI * 2 / nsegs;
-
-		g.lineStyle(1, cast(Palette.PinkRed, Int));
-		if (fill)
-			g.beginFill(cast(Palette.PinkRed));
-		for (i in 0...nsegs + 1) {
-			var a = i * angle;
-
-			var sinSum = sin(t, a, 2, 5, 5) + sin(-t, a, 3, 12, 3) + sin(t, a, 2, 10, 8);
-
-			var dx = x + (r + sinSum) * Math.cos(a);
-			var dy = y + (r + sinSum) * Math.sin(a);
-
-			g.lineTo(dx, dy);
-		}
-		g.endFill();
-	}
-
 	var water:Water;
+	var bubble:Bubble;
 
 	/**
 	 * Called once at startup
@@ -81,10 +53,10 @@ class Game extends hxd.App {
 
 		g = new h2d.Graphics(s2d);
 
-		hello = new h2d.Text(hxd.res.DefaultFont.get(), s2d);
-		hello.text = "Heaps Jelly";
-		hello.setPosition(5.0, 5.0);
 		time = 0.0;
+
+		bubble = new Bubble(s2d);
+		bubble.init();
 
 		water = new Water(s2d);
 		water.init();
@@ -104,10 +76,7 @@ class Game extends hxd.App {
 		g.beginFill(cast(Palette.PinkRed, Int));
 		g.drawRect(0, 0, s2d.width, s2d.height);
 
-		// Draw Circle
-		g.beginFill(cast(Palette.Dark, Int));
-		drawWavyCircle(s2d.width / 2, 150, 120, time);
-
+		bubble.update(dt, s2d.width / 2, 150, 120);
 		water.update(dt, 0, s2d.height - 50, s2d.width, 50);
 	}
 

@@ -7,655 +7,6 @@ function $extend(from, fields) {
 	if( fields.toString !== Object.prototype.toString ) proto.toString = fields.toString;
 	return proto;
 }
-var Constants = function() { };
-$hxClasses["Constants"] = Constants;
-Constants.__name__ = "Constants";
-var EReg = function(r,opt) {
-	this.r = new RegExp(r,opt.split("u").join(""));
-};
-$hxClasses["EReg"] = EReg;
-EReg.__name__ = "EReg";
-EReg.prototype = {
-	match: function(s) {
-		if(this.r.global) {
-			this.r.lastIndex = 0;
-		}
-		this.r.m = this.r.exec(s);
-		this.r.s = s;
-		return this.r.m != null;
-	}
-	,matched: function(n) {
-		if(this.r.m != null && n >= 0 && n < this.r.m.length) {
-			return this.r.m[n];
-		} else {
-			throw haxe_Exception.thrown("EReg::matched");
-		}
-	}
-	,matchedPos: function() {
-		if(this.r.m == null) {
-			throw haxe_Exception.thrown("No string matched");
-		}
-		return { pos : this.r.m.index, len : this.r.m[0].length};
-	}
-	,matchSub: function(s,pos,len) {
-		if(len == null) {
-			len = -1;
-		}
-		if(this.r.global) {
-			this.r.lastIndex = pos;
-			this.r.m = this.r.exec(len < 0 ? s : HxOverrides.substr(s,0,pos + len));
-			var b = this.r.m != null;
-			if(b) {
-				this.r.s = s;
-			}
-			return b;
-		} else {
-			var b = this.match(len < 0 ? HxOverrides.substr(s,pos,null) : HxOverrides.substr(s,pos,len));
-			if(b) {
-				this.r.s = s;
-				this.r.m.index += pos;
-			}
-			return b;
-		}
-	}
-	,__class__: EReg
-};
-var h3d_IDrawable = function() { };
-$hxClasses["h3d.IDrawable"] = h3d_IDrawable;
-h3d_IDrawable.__name__ = "h3d.IDrawable";
-h3d_IDrawable.__isInterface__ = true;
-h3d_IDrawable.prototype = {
-	__class__: h3d_IDrawable
-};
-var hxd_App = function() {
-	var _gthis = this;
-	var engine = h3d_Engine.CURRENT;
-	if(engine != null) {
-		this.engine = engine;
-		engine.onReady = $bind(this,this.setup);
-		haxe_Timer.delay($bind(this,this.setup),0);
-	} else {
-		hxd_System.start(function() {
-			engine = new h3d_Engine();
-			_gthis.engine = engine;
-			engine.onReady = $bind(_gthis,_gthis.setup);
-			engine.init();
-		});
-	}
-};
-$hxClasses["hxd.App"] = hxd_App;
-hxd_App.__name__ = "hxd.App";
-hxd_App.__interfaces__ = [h3d_IDrawable];
-hxd_App.staticHandler = function() {
-};
-hxd_App.prototype = {
-	onResize: function() {
-	}
-	,setScene: function(scene,disposePrevious) {
-		if(disposePrevious == null) {
-			disposePrevious = true;
-		}
-		var new2D = ((scene) instanceof h2d_Scene) ? scene : null;
-		var new3D = ((scene) instanceof h3d_scene_Scene) ? scene : null;
-		if(new2D != null) {
-			this.sevents.removeScene(this.s2d);
-			this.sevents.addScene(scene,0);
-		} else {
-			if(new3D != null) {
-				this.sevents.removeScene(this.s3d);
-			}
-			this.sevents.addScene(scene);
-		}
-		if(disposePrevious) {
-			if(new2D != null) {
-				this.s2d.dispose();
-			} else if(new3D != null) {
-				this.s3d.dispose();
-			} else {
-				throw haxe_Exception.thrown("Can't dispose previous scene");
-			}
-		}
-		if(new2D != null) {
-			this.s2d = new2D;
-		}
-		if(new3D != null) {
-			this.s3d = new3D;
-		}
-	}
-	,setCurrent: function() {
-		var _gthis = this;
-		this.engine = h3d_Engine.CURRENT;
-		this.isDisposed = false;
-		this.engine.onReady = hxd_App.staticHandler;
-		this.engine.onResized = function() {
-			if(_gthis.s2d == null) {
-				return;
-			}
-			_gthis.s2d.checkResize();
-			_gthis.onResize();
-		};
-		hxd_System.setLoop($bind(this,this.mainLoop));
-	}
-	,setScene2D: function(s2d,disposePrevious) {
-		if(disposePrevious == null) {
-			disposePrevious = true;
-		}
-		this.sevents.removeScene(this.s2d);
-		this.sevents.addScene(s2d,0);
-		if(disposePrevious) {
-			this.s2d.dispose();
-		}
-		this.s2d = s2d;
-	}
-	,setScene3D: function(s3d,disposePrevious) {
-		if(disposePrevious == null) {
-			disposePrevious = true;
-		}
-		this.sevents.removeScene(this.s3d);
-		this.sevents.addScene(s3d);
-		if(disposePrevious) {
-			this.s3d.dispose();
-		}
-		this.s3d = s3d;
-	}
-	,render: function(e) {
-		this.s3d.render(e);
-		this.s2d.render(e);
-	}
-	,setup: function() {
-		var _gthis = this;
-		var initDone = false;
-		this.engine.onReady = hxd_App.staticHandler;
-		this.engine.onResized = function() {
-			if(_gthis.s2d == null) {
-				return;
-			}
-			_gthis.s2d.checkResize();
-			if(initDone) {
-				_gthis.onResize();
-			}
-		};
-		this.s3d = new h3d_scene_Scene();
-		this.s2d = new h2d_Scene();
-		this.sevents = new hxd_SceneEvents();
-		this.sevents.addScene(this.s2d);
-		this.sevents.addScene(this.s3d);
-		this.loadAssets(function() {
-			initDone = true;
-			_gthis.init();
-			hxd_Timer.skip();
-			_gthis.mainLoop();
-			hxd_System.setLoop($bind(_gthis,_gthis.mainLoop));
-			hxd_Key.initialize();
-		});
-	}
-	,dispose: function() {
-		this.engine.onResized = hxd_App.staticHandler;
-		this.engine.onContextLost = hxd_App.staticHandler;
-		this.isDisposed = true;
-		this.s2d.dispose();
-		this.s3d.dispose();
-		this.sevents.dispose();
-	}
-	,loadAssets: function(onLoaded) {
-		onLoaded();
-	}
-	,init: function() {
-	}
-	,mainLoop: function() {
-		hxd_Timer.update();
-		this.sevents.checkEvents();
-		if(this.isDisposed) {
-			return;
-		}
-		this.update(hxd_Timer.dt);
-		if(this.isDisposed) {
-			return;
-		}
-		var dt = hxd_Timer.dt;
-		if(this.s2d != null) {
-			this.s2d.setElapsedTime(dt);
-		}
-		if(this.s3d != null) {
-			this.s3d.setElapsedTime(dt);
-		}
-		this.engine.render(this);
-	}
-	,update: function(dt) {
-	}
-	,__class__: hxd_App
-};
-var Game = function() {
-	hxd_App.call(this);
-};
-$hxClasses["Game"] = Game;
-Game.__name__ = "Game";
-Game.main = function() {
-	Game.inst = new Game();
-};
-Game.__super__ = hxd_App;
-Game.prototype = $extend(hxd_App.prototype,{
-	sin: function(time,angle,speed,freq,amp) {
-		return Math.sin(time * speed + angle * freq) * amp;
-	}
-	,drawWavyLine: function(startX,y,len,t) {
-		var x = startX;
-		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
-		var _g = 0;
-		var _g1 = len;
-		while(_g < _g1) {
-			var i = _g++;
-			var dx = x + i;
-			var sinSum = this.sin(t,i / len,1.2,25,5) + this.sin(t,i / len,3.1,20,4) + this.sin(t,i / len,2.2,32,7);
-			var dy = y + sinSum;
-			var _this = this.g;
-			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
-		}
-		this.g.endFill();
-	}
-	,drawWavyCircle: function(x,y,r,t,fill) {
-		if(fill == null) {
-			fill = false;
-		}
-		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2) / 4);
-		if(nsegs < 3) {
-			nsegs = 3;
-		}
-		var angle = Math.PI * 2 / nsegs;
-		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
-		if(fill) {
-			this.g.beginFill(11546716);
-		}
-		var _g = 0;
-		var _g1 = nsegs + 1;
-		while(_g < _g1) {
-			var i = _g++;
-			var a = i * angle;
-			var sinSum = this.sin(t,a,2,5,5) + this.sin(-t,a,3,12,3) + this.sin(t,a,2,10,8);
-			var dx = x + (r + sinSum) * Math.cos(a);
-			var dy = y + (r + sinSum) * Math.sin(a);
-			var _this = this.g;
-			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
-		}
-		this.g.endFill();
-	}
-	,init: function() {
-		hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("og"))));
-		this.s2d.set_scaleMode(h2d_ScaleMode.LetterBox(640,360));
-		this.g = new h2d_Graphics(this.s2d);
-		this.hello = new h2d_Text(hxd_res_DefaultFont.get(),this.s2d);
-		this.hello.set_text("Heaps Jelly");
-		var _this = this.hello;
-		_this.posChanged = true;
-		_this.x = 5.0;
-		_this.posChanged = true;
-		_this.y = 5.0;
-		this.time = 0.0;
-		this.water = new Water(this.s2d);
-		this.water.init();
-	}
-	,update: function(dt) {
-		this.g.clear();
-		this.time += dt;
-		this.g.beginFill(js_Boot.__cast(11546716 , Int));
-		this.g.drawRect(0,0,this.s2d.width,this.s2d.height);
-		this.g.beginFill(js_Boot.__cast(2565942 , Int));
-		this.drawWavyCircle(this.s2d.width / 2,150,120,this.time);
-		this.water.update(dt,0,this.s2d.height - 50,this.s2d.width,50);
-	}
-	,__class__: Game
-});
-var HxOverrides = function() { };
-$hxClasses["HxOverrides"] = HxOverrides;
-HxOverrides.__name__ = "HxOverrides";
-HxOverrides.strDate = function(s) {
-	switch(s.length) {
-	case 8:
-		var k = s.split(":");
-		var d = new Date();
-		d["setTime"](0);
-		d["setUTCHours"](k[0]);
-		d["setUTCMinutes"](k[1]);
-		d["setUTCSeconds"](k[2]);
-		return d;
-	case 10:
-		var k = s.split("-");
-		return new Date(k[0],k[1] - 1,k[2],0,0,0);
-	case 19:
-		var k = s.split(" ");
-		var y = k[0].split("-");
-		var t = k[1].split(":");
-		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
-	default:
-		throw haxe_Exception.thrown("Invalid date format : " + s);
-	}
-};
-HxOverrides.cca = function(s,index) {
-	var x = s.charCodeAt(index);
-	if(x != x) {
-		return undefined;
-	}
-	return x;
-};
-HxOverrides.substr = function(s,pos,len) {
-	if(len == null) {
-		len = s.length;
-	} else if(len < 0) {
-		if(pos == 0) {
-			len = s.length + len;
-		} else {
-			return "";
-		}
-	}
-	return s.substr(pos,len);
-};
-HxOverrides.remove = function(a,obj) {
-	var i = a.indexOf(obj);
-	if(i == -1) {
-		return false;
-	}
-	a.splice(i,1);
-	return true;
-};
-HxOverrides.now = function() {
-	return Date.now();
-};
-var Lambda = function() { };
-$hxClasses["Lambda"] = Lambda;
-Lambda.__name__ = "Lambda";
-Lambda.array = function(it) {
-	var a = [];
-	var i = $getIterator(it);
-	while(i.hasNext()) {
-		var i1 = i.next();
-		a.push(i1);
-	}
-	return a;
-};
-Math.__name__ = "Math";
-var Reflect = function() { };
-$hxClasses["Reflect"] = Reflect;
-Reflect.__name__ = "Reflect";
-Reflect.field = function(o,field) {
-	try {
-		return o[field];
-	} catch( _g ) {
-		return null;
-	}
-};
-Reflect.fields = function(o) {
-	var a = [];
-	if(o != null) {
-		var hasOwnProperty = Object.prototype.hasOwnProperty;
-		for( var f in o ) {
-		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) {
-			a.push(f);
-		}
-		}
-	}
-	return a;
-};
-Reflect.isFunction = function(f) {
-	if(typeof(f) == "function") {
-		return !(f.__name__ || f.__ename__);
-	} else {
-		return false;
-	}
-};
-Reflect.compare = function(a,b) {
-	if(a == b) {
-		return 0;
-	} else if(a > b) {
-		return 1;
-	} else {
-		return -1;
-	}
-};
-Reflect.compareMethods = function(f1,f2) {
-	if(f1 == f2) {
-		return true;
-	}
-	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) {
-		return false;
-	}
-	if(f1.scope == f2.scope && f1.method == f2.method) {
-		return f1.method != null;
-	} else {
-		return false;
-	}
-};
-Reflect.isEnumValue = function(v) {
-	if(v != null) {
-		return v.__enum__ != null;
-	} else {
-		return false;
-	}
-};
-Reflect.deleteField = function(o,field) {
-	if(!Object.prototype.hasOwnProperty.call(o,field)) {
-		return false;
-	}
-	delete(o[field]);
-	return true;
-};
-var Std = function() { };
-$hxClasses["Std"] = Std;
-Std.__name__ = "Std";
-Std.string = function(s) {
-	return js_Boot.__string_rec(s,"");
-};
-Std.parseInt = function(x) {
-	if(x != null) {
-		var _g = 0;
-		var _g1 = x.length;
-		while(_g < _g1) {
-			var i = _g++;
-			var c = x.charCodeAt(i);
-			if(c <= 8 || c >= 14 && c != 32 && c != 45) {
-				var nc = x.charCodeAt(i + 1);
-				var v = parseInt(x,nc == 120 || nc == 88 ? 16 : 10);
-				if(isNaN(v)) {
-					return null;
-				} else {
-					return v;
-				}
-			}
-		}
-	}
-	return null;
-};
-Std.random = function(x) {
-	if(x <= 0) {
-		return 0;
-	} else {
-		return Math.floor(Math.random() * x);
-	}
-};
-var StringBuf = function() {
-	this.b = "";
-};
-$hxClasses["StringBuf"] = StringBuf;
-StringBuf.__name__ = "StringBuf";
-StringBuf.prototype = {
-	__class__: StringBuf
-};
-var StringTools = function() { };
-$hxClasses["StringTools"] = StringTools;
-StringTools.__name__ = "StringTools";
-StringTools.htmlEscape = function(s,quotes) {
-	var buf_b = "";
-	var _g_offset = 0;
-	var _g_s = s;
-	while(_g_offset < _g_s.length) {
-		var s = _g_s;
-		var index = _g_offset++;
-		var c = s.charCodeAt(index);
-		if(c >= 55296 && c <= 56319) {
-			c = c - 55232 << 10 | s.charCodeAt(index + 1) & 1023;
-		}
-		var c1 = c;
-		if(c1 >= 65536) {
-			++_g_offset;
-		}
-		var code = c1;
-		switch(code) {
-		case 34:
-			if(quotes) {
-				buf_b += "&quot;";
-			} else {
-				buf_b += String.fromCodePoint(code);
-			}
-			break;
-		case 38:
-			buf_b += "&amp;";
-			break;
-		case 39:
-			if(quotes) {
-				buf_b += "&#039;";
-			} else {
-				buf_b += String.fromCodePoint(code);
-			}
-			break;
-		case 60:
-			buf_b += "&lt;";
-			break;
-		case 62:
-			buf_b += "&gt;";
-			break;
-		default:
-			buf_b += String.fromCodePoint(code);
-		}
-	}
-	return buf_b;
-};
-StringTools.startsWith = function(s,start) {
-	if(s.length >= start.length) {
-		return s.lastIndexOf(start,0) == 0;
-	} else {
-		return false;
-	}
-};
-StringTools.isSpace = function(s,pos) {
-	var c = HxOverrides.cca(s,pos);
-	if(!(c > 8 && c < 14)) {
-		return c == 32;
-	} else {
-		return true;
-	}
-};
-StringTools.ltrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,r)) ++r;
-	if(r > 0) {
-		return HxOverrides.substr(s,r,l - r);
-	} else {
-		return s;
-	}
-};
-StringTools.rtrim = function(s) {
-	var l = s.length;
-	var r = 0;
-	while(r < l && StringTools.isSpace(s,l - r - 1)) ++r;
-	if(r > 0) {
-		return HxOverrides.substr(s,0,l - r);
-	} else {
-		return s;
-	}
-};
-StringTools.trim = function(s) {
-	return StringTools.ltrim(StringTools.rtrim(s));
-};
-StringTools.hex = function(n,digits) {
-	var s = "";
-	var hexChars = "0123456789ABCDEF";
-	while(true) {
-		s = hexChars.charAt(n & 15) + s;
-		n >>>= 4;
-		if(!(n > 0)) {
-			break;
-		}
-	}
-	if(digits != null) {
-		while(s.length < digits) s = "0" + s;
-	}
-	return s;
-};
-var Type = function() { };
-$hxClasses["Type"] = Type;
-Type.__name__ = "Type";
-Type.createInstance = function(cl,args) {
-	var ctor = Function.prototype.bind.apply(cl,[null].concat(args));
-	return new (ctor);
-};
-Type.createEnum = function(e,constr,params) {
-	var f = Reflect.field(e,constr);
-	if(f == null) {
-		throw haxe_Exception.thrown("No such constructor " + constr);
-	}
-	if(Reflect.isFunction(f)) {
-		if(params == null) {
-			throw haxe_Exception.thrown("Constructor " + constr + " need parameters");
-		}
-		return f.apply(e,params);
-	}
-	if(params != null && params.length != 0) {
-		throw haxe_Exception.thrown("Constructor " + constr + " does not need parameters");
-	}
-	return f;
-};
-Type.createEnumIndex = function(e,index,params) {
-	var c = e.__constructs__[index];
-	if(c == null) {
-		throw haxe_Exception.thrown(index + " is not a valid enum constructor index");
-	}
-	return Type.createEnum(e,c,params);
-};
-Type.enumEq = function(a,b) {
-	if(a == b) {
-		return true;
-	}
-	try {
-		var e = a.__enum__;
-		if(e == null || e != b.__enum__) {
-			return false;
-		}
-		if(a._hx_index != b._hx_index) {
-			return false;
-		}
-		var enm = $hxEnums[e];
-		var ctorName = enm.__constructs__[a._hx_index];
-		var params = enm[ctorName].__params__;
-		var _g = 0;
-		while(_g < params.length) {
-			var f = params[_g];
-			++_g;
-			if(!Type.enumEq(a[f],b[f])) {
-				return false;
-			}
-		}
-	} catch( _g ) {
-		return false;
-	}
-	return true;
-};
-Type.enumParameters = function(e) {
-	var enm = $hxEnums[e.__enum__];
-	var ctorName = enm.__constructs__[e._hx_index];
-	var params = enm[ctorName].__params__;
-	if(params != null) {
-		var _g = [];
-		var _g1 = 0;
-		while(_g1 < params.length) {
-			var p = params[_g1];
-			++_g1;
-			_g.push(e[p]);
-		}
-		return _g;
-	} else {
-		return [];
-	}
-};
 var h2d_Object = function(parent) {
 	this.alpha = 1.;
 	this.matA = 1;
@@ -1840,6 +1191,600 @@ h2d_Object.prototype = {
 	}
 	,__class__: h2d_Object
 };
+var Bubble = function(parent) {
+	h2d_Object.call(this,parent);
+};
+$hxClasses["Bubble"] = Bubble;
+Bubble.__name__ = "Bubble";
+Bubble.__super__ = h2d_Object;
+Bubble.prototype = $extend(h2d_Object.prototype,{
+	drawWavyCircle: function(x,y,r,t,fill) {
+		if(fill == null) {
+			fill = false;
+		}
+		var nsegs = Math.ceil(Math.abs(r * 3.14 * 2) / 4);
+		if(nsegs < 3) {
+			nsegs = 3;
+		}
+		var angle = Math.PI * 2 / nsegs;
+		this.g.lineStyle(1,Constants.Palette.Dark);
+		if(fill) {
+			this.g.beginFill(Constants.Palette.Dark);
+		}
+		var _g = 0;
+		var _g1 = nsegs + 1;
+		while(_g < _g1) {
+			var i = _g++;
+			var a = i * angle;
+			var sinSum = JellyMath.sin(t,a,2.5,5,5) + JellyMath.sin(-t,a,2,12,3) + JellyMath.sin(t,a,3,10,6);
+			var dx = x + (r + sinSum) * Math.cos(a);
+			var dy = y + (r + sinSum) * Math.sin(a);
+			var _this = this.g;
+			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
+		}
+		this.g.endFill();
+	}
+	,init: function() {
+		this.time = 0.0;
+		this.g = new h2d_Graphics(this.getScene());
+	}
+	,update: function(dt,x,y,r) {
+		this.time += dt;
+		this.g.clear();
+		this.drawWavyCircle(x,y,r,this.time,true);
+	}
+	,__class__: Bubble
+});
+var Constants = function() { };
+$hxClasses["Constants"] = Constants;
+Constants.__name__ = "Constants";
+var EReg = function(r,opt) {
+	this.r = new RegExp(r,opt.split("u").join(""));
+};
+$hxClasses["EReg"] = EReg;
+EReg.__name__ = "EReg";
+EReg.prototype = {
+	match: function(s) {
+		if(this.r.global) {
+			this.r.lastIndex = 0;
+		}
+		this.r.m = this.r.exec(s);
+		this.r.s = s;
+		return this.r.m != null;
+	}
+	,matched: function(n) {
+		if(this.r.m != null && n >= 0 && n < this.r.m.length) {
+			return this.r.m[n];
+		} else {
+			throw haxe_Exception.thrown("EReg::matched");
+		}
+	}
+	,__class__: EReg
+};
+var h3d_IDrawable = function() { };
+$hxClasses["h3d.IDrawable"] = h3d_IDrawable;
+h3d_IDrawable.__name__ = "h3d.IDrawable";
+h3d_IDrawable.__isInterface__ = true;
+h3d_IDrawable.prototype = {
+	__class__: h3d_IDrawable
+};
+var hxd_App = function() {
+	var _gthis = this;
+	var engine = h3d_Engine.CURRENT;
+	if(engine != null) {
+		this.engine = engine;
+		engine.onReady = $bind(this,this.setup);
+		haxe_Timer.delay($bind(this,this.setup),0);
+	} else {
+		hxd_System.start(function() {
+			engine = new h3d_Engine();
+			_gthis.engine = engine;
+			engine.onReady = $bind(_gthis,_gthis.setup);
+			engine.init();
+		});
+	}
+};
+$hxClasses["hxd.App"] = hxd_App;
+hxd_App.__name__ = "hxd.App";
+hxd_App.__interfaces__ = [h3d_IDrawable];
+hxd_App.staticHandler = function() {
+};
+hxd_App.prototype = {
+	onResize: function() {
+	}
+	,setScene: function(scene,disposePrevious) {
+		if(disposePrevious == null) {
+			disposePrevious = true;
+		}
+		var new2D = ((scene) instanceof h2d_Scene) ? scene : null;
+		var new3D = ((scene) instanceof h3d_scene_Scene) ? scene : null;
+		if(new2D != null) {
+			this.sevents.removeScene(this.s2d);
+			this.sevents.addScene(scene,0);
+		} else {
+			if(new3D != null) {
+				this.sevents.removeScene(this.s3d);
+			}
+			this.sevents.addScene(scene);
+		}
+		if(disposePrevious) {
+			if(new2D != null) {
+				this.s2d.dispose();
+			} else if(new3D != null) {
+				this.s3d.dispose();
+			} else {
+				throw haxe_Exception.thrown("Can't dispose previous scene");
+			}
+		}
+		if(new2D != null) {
+			this.s2d = new2D;
+		}
+		if(new3D != null) {
+			this.s3d = new3D;
+		}
+	}
+	,setCurrent: function() {
+		var _gthis = this;
+		this.engine = h3d_Engine.CURRENT;
+		this.isDisposed = false;
+		this.engine.onReady = hxd_App.staticHandler;
+		this.engine.onResized = function() {
+			if(_gthis.s2d == null) {
+				return;
+			}
+			_gthis.s2d.checkResize();
+			_gthis.onResize();
+		};
+		hxd_System.setLoop($bind(this,this.mainLoop));
+	}
+	,setScene2D: function(s2d,disposePrevious) {
+		if(disposePrevious == null) {
+			disposePrevious = true;
+		}
+		this.sevents.removeScene(this.s2d);
+		this.sevents.addScene(s2d,0);
+		if(disposePrevious) {
+			this.s2d.dispose();
+		}
+		this.s2d = s2d;
+	}
+	,setScene3D: function(s3d,disposePrevious) {
+		if(disposePrevious == null) {
+			disposePrevious = true;
+		}
+		this.sevents.removeScene(this.s3d);
+		this.sevents.addScene(s3d);
+		if(disposePrevious) {
+			this.s3d.dispose();
+		}
+		this.s3d = s3d;
+	}
+	,render: function(e) {
+		this.s3d.render(e);
+		this.s2d.render(e);
+	}
+	,setup: function() {
+		var _gthis = this;
+		var initDone = false;
+		this.engine.onReady = hxd_App.staticHandler;
+		this.engine.onResized = function() {
+			if(_gthis.s2d == null) {
+				return;
+			}
+			_gthis.s2d.checkResize();
+			if(initDone) {
+				_gthis.onResize();
+			}
+		};
+		this.s3d = new h3d_scene_Scene();
+		this.s2d = new h2d_Scene();
+		this.sevents = new hxd_SceneEvents();
+		this.sevents.addScene(this.s2d);
+		this.sevents.addScene(this.s3d);
+		this.loadAssets(function() {
+			initDone = true;
+			_gthis.init();
+			hxd_Timer.skip();
+			_gthis.mainLoop();
+			hxd_System.setLoop($bind(_gthis,_gthis.mainLoop));
+			hxd_Key.initialize();
+		});
+	}
+	,dispose: function() {
+		this.engine.onResized = hxd_App.staticHandler;
+		this.engine.onContextLost = hxd_App.staticHandler;
+		this.isDisposed = true;
+		this.s2d.dispose();
+		this.s3d.dispose();
+		this.sevents.dispose();
+	}
+	,loadAssets: function(onLoaded) {
+		onLoaded();
+	}
+	,init: function() {
+	}
+	,mainLoop: function() {
+		hxd_Timer.update();
+		this.sevents.checkEvents();
+		if(this.isDisposed) {
+			return;
+		}
+		this.update(hxd_Timer.dt);
+		if(this.isDisposed) {
+			return;
+		}
+		var dt = hxd_Timer.dt;
+		if(this.s2d != null) {
+			this.s2d.setElapsedTime(dt);
+		}
+		if(this.s3d != null) {
+			this.s3d.setElapsedTime(dt);
+		}
+		this.engine.render(this);
+	}
+	,update: function(dt) {
+	}
+	,__class__: hxd_App
+};
+var Game = function() {
+	hxd_App.call(this);
+};
+$hxClasses["Game"] = Game;
+Game.__name__ = "Game";
+Game.main = function() {
+	Game.inst = new Game();
+};
+Game.__super__ = hxd_App;
+Game.prototype = $extend(hxd_App.prototype,{
+	sin: function(time,angle,speed,freq,amp) {
+		return Math.sin(time * speed + angle * freq) * amp;
+	}
+	,drawWavyLine: function(startX,y,len,t) {
+		var x = startX;
+		this.g.lineStyle(1,js_Boot.__cast(11546716 , Int));
+		var _g = 0;
+		var _g1 = len;
+		while(_g < _g1) {
+			var i = _g++;
+			var dx = x + i;
+			var sinSum = this.sin(t,i / len,1.2,25,5) + this.sin(t,i / len,3.1,20,4) + this.sin(t,i / len,2.2,32,7);
+			var dy = y + sinSum;
+			var _this = this.g;
+			_this.addVertex(dx,dy,_this.curR,_this.curG,_this.curB,_this.curA,dx * _this.ma + dy * _this.mc + _this.mx,dx * _this.mb + dy * _this.md + _this.my);
+		}
+		this.g.endFill();
+	}
+	,init: function() {
+		hxd_Res.set_loader(new hxd_res_Loader(new hxd_fs_EmbedFileSystem(haxe_Unserializer.run("og"))));
+		this.s2d.set_scaleMode(h2d_ScaleMode.LetterBox(640,360));
+		this.g = new h2d_Graphics(this.s2d);
+		this.time = 0.0;
+		this.bubble = new Bubble(this.s2d);
+		this.bubble.init();
+		this.water = new Water(this.s2d);
+		this.water.init();
+	}
+	,update: function(dt) {
+		this.g.clear();
+		this.time += dt;
+		this.g.beginFill(js_Boot.__cast(11546716 , Int));
+		this.g.drawRect(0,0,this.s2d.width,this.s2d.height);
+		this.bubble.update(dt,this.s2d.width / 2,150,120);
+		this.water.update(dt,0,this.s2d.height - 50,this.s2d.width,50);
+	}
+	,__class__: Game
+});
+var HxOverrides = function() { };
+$hxClasses["HxOverrides"] = HxOverrides;
+HxOverrides.__name__ = "HxOverrides";
+HxOverrides.strDate = function(s) {
+	switch(s.length) {
+	case 8:
+		var k = s.split(":");
+		var d = new Date();
+		d["setTime"](0);
+		d["setUTCHours"](k[0]);
+		d["setUTCMinutes"](k[1]);
+		d["setUTCSeconds"](k[2]);
+		return d;
+	case 10:
+		var k = s.split("-");
+		return new Date(k[0],k[1] - 1,k[2],0,0,0);
+	case 19:
+		var k = s.split(" ");
+		var y = k[0].split("-");
+		var t = k[1].split(":");
+		return new Date(y[0],y[1] - 1,y[2],t[0],t[1],t[2]);
+	default:
+		throw haxe_Exception.thrown("Invalid date format : " + s);
+	}
+};
+HxOverrides.cca = function(s,index) {
+	var x = s.charCodeAt(index);
+	if(x != x) {
+		return undefined;
+	}
+	return x;
+};
+HxOverrides.substr = function(s,pos,len) {
+	if(len == null) {
+		len = s.length;
+	} else if(len < 0) {
+		if(pos == 0) {
+			len = s.length + len;
+		} else {
+			return "";
+		}
+	}
+	return s.substr(pos,len);
+};
+HxOverrides.remove = function(a,obj) {
+	var i = a.indexOf(obj);
+	if(i == -1) {
+		return false;
+	}
+	a.splice(i,1);
+	return true;
+};
+HxOverrides.now = function() {
+	return Date.now();
+};
+var JellyMath = function() { };
+$hxClasses["JellyMath"] = JellyMath;
+JellyMath.__name__ = "JellyMath";
+JellyMath.sin = function(time,step,speed,freq,amp) {
+	return Math.sin(time * speed + step * freq) * amp;
+};
+var Lambda = function() { };
+$hxClasses["Lambda"] = Lambda;
+Lambda.__name__ = "Lambda";
+Lambda.array = function(it) {
+	var a = [];
+	var i = $getIterator(it);
+	while(i.hasNext()) {
+		var i1 = i.next();
+		a.push(i1);
+	}
+	return a;
+};
+Math.__name__ = "Math";
+var Reflect = function() { };
+$hxClasses["Reflect"] = Reflect;
+Reflect.__name__ = "Reflect";
+Reflect.field = function(o,field) {
+	try {
+		return o[field];
+	} catch( _g ) {
+		return null;
+	}
+};
+Reflect.fields = function(o) {
+	var a = [];
+	if(o != null) {
+		var hasOwnProperty = Object.prototype.hasOwnProperty;
+		for( var f in o ) {
+		if(f != "__id__" && f != "hx__closures__" && hasOwnProperty.call(o,f)) {
+			a.push(f);
+		}
+		}
+	}
+	return a;
+};
+Reflect.isFunction = function(f) {
+	if(typeof(f) == "function") {
+		return !(f.__name__ || f.__ename__);
+	} else {
+		return false;
+	}
+};
+Reflect.compare = function(a,b) {
+	if(a == b) {
+		return 0;
+	} else if(a > b) {
+		return 1;
+	} else {
+		return -1;
+	}
+};
+Reflect.compareMethods = function(f1,f2) {
+	if(f1 == f2) {
+		return true;
+	}
+	if(!Reflect.isFunction(f1) || !Reflect.isFunction(f2)) {
+		return false;
+	}
+	if(f1.scope == f2.scope && f1.method == f2.method) {
+		return f1.method != null;
+	} else {
+		return false;
+	}
+};
+Reflect.isEnumValue = function(v) {
+	if(v != null) {
+		return v.__enum__ != null;
+	} else {
+		return false;
+	}
+};
+Reflect.deleteField = function(o,field) {
+	if(!Object.prototype.hasOwnProperty.call(o,field)) {
+		return false;
+	}
+	delete(o[field]);
+	return true;
+};
+var Std = function() { };
+$hxClasses["Std"] = Std;
+Std.__name__ = "Std";
+Std.string = function(s) {
+	return js_Boot.__string_rec(s,"");
+};
+Std.parseInt = function(x) {
+	if(x != null) {
+		var _g = 0;
+		var _g1 = x.length;
+		while(_g < _g1) {
+			var i = _g++;
+			var c = x.charCodeAt(i);
+			if(c <= 8 || c >= 14 && c != 32 && c != 45) {
+				var nc = x.charCodeAt(i + 1);
+				var v = parseInt(x,nc == 120 || nc == 88 ? 16 : 10);
+				if(isNaN(v)) {
+					return null;
+				} else {
+					return v;
+				}
+			}
+		}
+	}
+	return null;
+};
+Std.random = function(x) {
+	if(x <= 0) {
+		return 0;
+	} else {
+		return Math.floor(Math.random() * x);
+	}
+};
+var StringBuf = function() {
+	this.b = "";
+};
+$hxClasses["StringBuf"] = StringBuf;
+StringBuf.__name__ = "StringBuf";
+StringBuf.prototype = {
+	__class__: StringBuf
+};
+var StringTools = function() { };
+$hxClasses["StringTools"] = StringTools;
+StringTools.__name__ = "StringTools";
+StringTools.startsWith = function(s,start) {
+	if(s.length >= start.length) {
+		return s.lastIndexOf(start,0) == 0;
+	} else {
+		return false;
+	}
+};
+StringTools.isSpace = function(s,pos) {
+	var c = HxOverrides.cca(s,pos);
+	if(!(c > 8 && c < 14)) {
+		return c == 32;
+	} else {
+		return true;
+	}
+};
+StringTools.ltrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,r)) ++r;
+	if(r > 0) {
+		return HxOverrides.substr(s,r,l - r);
+	} else {
+		return s;
+	}
+};
+StringTools.rtrim = function(s) {
+	var l = s.length;
+	var r = 0;
+	while(r < l && StringTools.isSpace(s,l - r - 1)) ++r;
+	if(r > 0) {
+		return HxOverrides.substr(s,0,l - r);
+	} else {
+		return s;
+	}
+};
+StringTools.trim = function(s) {
+	return StringTools.ltrim(StringTools.rtrim(s));
+};
+StringTools.hex = function(n,digits) {
+	var s = "";
+	var hexChars = "0123456789ABCDEF";
+	while(true) {
+		s = hexChars.charAt(n & 15) + s;
+		n >>>= 4;
+		if(!(n > 0)) {
+			break;
+		}
+	}
+	if(digits != null) {
+		while(s.length < digits) s = "0" + s;
+	}
+	return s;
+};
+var Type = function() { };
+$hxClasses["Type"] = Type;
+Type.__name__ = "Type";
+Type.createInstance = function(cl,args) {
+	var ctor = Function.prototype.bind.apply(cl,[null].concat(args));
+	return new (ctor);
+};
+Type.createEnum = function(e,constr,params) {
+	var f = Reflect.field(e,constr);
+	if(f == null) {
+		throw haxe_Exception.thrown("No such constructor " + constr);
+	}
+	if(Reflect.isFunction(f)) {
+		if(params == null) {
+			throw haxe_Exception.thrown("Constructor " + constr + " need parameters");
+		}
+		return f.apply(e,params);
+	}
+	if(params != null && params.length != 0) {
+		throw haxe_Exception.thrown("Constructor " + constr + " does not need parameters");
+	}
+	return f;
+};
+Type.createEnumIndex = function(e,index,params) {
+	var c = e.__constructs__[index];
+	if(c == null) {
+		throw haxe_Exception.thrown(index + " is not a valid enum constructor index");
+	}
+	return Type.createEnum(e,c,params);
+};
+Type.enumEq = function(a,b) {
+	if(a == b) {
+		return true;
+	}
+	try {
+		var e = a.__enum__;
+		if(e == null || e != b.__enum__) {
+			return false;
+		}
+		if(a._hx_index != b._hx_index) {
+			return false;
+		}
+		var enm = $hxEnums[e];
+		var ctorName = enm.__constructs__[a._hx_index];
+		var params = enm[ctorName].__params__;
+		var _g = 0;
+		while(_g < params.length) {
+			var f = params[_g];
+			++_g;
+			if(!Type.enumEq(a[f],b[f])) {
+				return false;
+			}
+		}
+	} catch( _g ) {
+		return false;
+	}
+	return true;
+};
+Type.enumParameters = function(e) {
+	var enm = $hxEnums[e.__enum__];
+	var ctorName = enm.__constructs__[e._hx_index];
+	var params = enm[ctorName].__params__;
+	if(params != null) {
+		var _g = [];
+		var _g1 = 0;
+		while(_g1 < params.length) {
+			var p = params[_g1];
+			++_g1;
+			_g.push(e[p]);
+		}
+		return _g;
+	} else {
+		return [];
+	}
+};
 var Water = function(parent) {
 	h2d_Object.call(this,parent);
 };
@@ -1847,10 +1792,7 @@ $hxClasses["Water"] = Water;
 Water.__name__ = "Water";
 Water.__super__ = h2d_Object;
 Water.prototype = $extend(h2d_Object.prototype,{
-	sin: function(time,step,speed,freq,amp) {
-		return Math.sin(time * speed + step * freq) * amp;
-	}
-	,drawWater: function(x,y,w,h) {
+	drawWater: function(x,y,w,h) {
 		this.g.beginFill(Constants.Palette.Blue);
 		this.g.lineStyle(0,Constants.Palette.LightBlue);
 		var len = x + w;
@@ -1860,7 +1802,7 @@ Water.prototype = $extend(h2d_Object.prototype,{
 		while(_g < _g1) {
 			var i = _g++;
 			var dx = i;
-			var sinSum = this.sin(this.time,i / len,1.2,12,1.23) + this.sin(-this.time,i / len,3.1,30,0.75) + this.sin(this.time,i / len,2.1,10,1.0);
+			var sinSum = JellyMath.sin(this.time,i / len,1.2,12,1.23) + JellyMath.sin(-this.time,i / len,3.1,30,0.75) + JellyMath.sin(this.time,i / len,2.1,10,1.0);
 			var dy = y + sinSum;
 			if(dx == x) {
 				sy = dy;
@@ -1889,194 +1831,6 @@ Water.prototype = $extend(h2d_Object.prototype,{
 	}
 	,__class__: Water
 });
-var XmlType = {};
-XmlType.toString = function(this1) {
-	switch(this1) {
-	case 0:
-		return "Element";
-	case 1:
-		return "PCData";
-	case 2:
-		return "CData";
-	case 3:
-		return "Comment";
-	case 4:
-		return "DocType";
-	case 5:
-		return "ProcessingInstruction";
-	case 6:
-		return "Document";
-	}
-};
-var Xml = function(nodeType) {
-	this.nodeType = nodeType;
-	this.children = [];
-	this.attributeMap = new haxe_ds_StringMap();
-};
-$hxClasses["Xml"] = Xml;
-Xml.__name__ = "Xml";
-Xml.parse = function(str) {
-	return haxe_xml_Parser.parse(str);
-};
-Xml.createElement = function(name) {
-	var xml = new Xml(Xml.Element);
-	if(xml.nodeType != Xml.Element) {
-		throw haxe_Exception.thrown("Bad node type, expected Element but found " + (xml.nodeType == null ? "null" : XmlType.toString(xml.nodeType)));
-	}
-	xml.nodeName = name;
-	return xml;
-};
-Xml.createPCData = function(data) {
-	var xml = new Xml(Xml.PCData);
-	if(xml.nodeType == Xml.Document || xml.nodeType == Xml.Element) {
-		throw haxe_Exception.thrown("Bad node type, unexpected " + (xml.nodeType == null ? "null" : XmlType.toString(xml.nodeType)));
-	}
-	xml.nodeValue = data;
-	return xml;
-};
-Xml.createCData = function(data) {
-	var xml = new Xml(Xml.CData);
-	if(xml.nodeType == Xml.Document || xml.nodeType == Xml.Element) {
-		throw haxe_Exception.thrown("Bad node type, unexpected " + (xml.nodeType == null ? "null" : XmlType.toString(xml.nodeType)));
-	}
-	xml.nodeValue = data;
-	return xml;
-};
-Xml.createComment = function(data) {
-	var xml = new Xml(Xml.Comment);
-	if(xml.nodeType == Xml.Document || xml.nodeType == Xml.Element) {
-		throw haxe_Exception.thrown("Bad node type, unexpected " + (xml.nodeType == null ? "null" : XmlType.toString(xml.nodeType)));
-	}
-	xml.nodeValue = data;
-	return xml;
-};
-Xml.createDocType = function(data) {
-	var xml = new Xml(Xml.DocType);
-	if(xml.nodeType == Xml.Document || xml.nodeType == Xml.Element) {
-		throw haxe_Exception.thrown("Bad node type, unexpected " + (xml.nodeType == null ? "null" : XmlType.toString(xml.nodeType)));
-	}
-	xml.nodeValue = data;
-	return xml;
-};
-Xml.createProcessingInstruction = function(data) {
-	var xml = new Xml(Xml.ProcessingInstruction);
-	if(xml.nodeType == Xml.Document || xml.nodeType == Xml.Element) {
-		throw haxe_Exception.thrown("Bad node type, unexpected " + (xml.nodeType == null ? "null" : XmlType.toString(xml.nodeType)));
-	}
-	xml.nodeValue = data;
-	return xml;
-};
-Xml.createDocument = function() {
-	return new Xml(Xml.Document);
-};
-Xml.prototype = {
-	get: function(att) {
-		if(this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		return this.attributeMap.h[att];
-	}
-	,set: function(att,value) {
-		if(this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		this.attributeMap.h[att] = value;
-	}
-	,exists: function(att) {
-		if(this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		return Object.prototype.hasOwnProperty.call(this.attributeMap.h,att);
-	}
-	,attributes: function() {
-		if(this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		return haxe_ds_StringMap.keysIterator(this.attributeMap.h);
-	}
-	,elements: function() {
-		if(this.nodeType != Xml.Document && this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		var _g = [];
-		var _g1 = 0;
-		var _g2 = this.children;
-		while(_g1 < _g2.length) {
-			var child = _g2[_g1];
-			++_g1;
-			if(child.nodeType == Xml.Element) {
-				_g.push(child);
-			}
-		}
-		var ret = _g;
-		return new haxe_iterators_ArrayIterator(ret);
-	}
-	,elementsNamed: function(name) {
-		if(this.nodeType != Xml.Document && this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		var _g = [];
-		var _g1 = 0;
-		var _g2 = this.children;
-		while(_g1 < _g2.length) {
-			var child = _g2[_g1];
-			++_g1;
-			var tmp;
-			if(child.nodeType == Xml.Element) {
-				if(child.nodeType != Xml.Element) {
-					throw haxe_Exception.thrown("Bad node type, expected Element but found " + (child.nodeType == null ? "null" : XmlType.toString(child.nodeType)));
-				}
-				tmp = child.nodeName == name;
-			} else {
-				tmp = false;
-			}
-			if(tmp) {
-				_g.push(child);
-			}
-		}
-		var ret = _g;
-		return new haxe_iterators_ArrayIterator(ret);
-	}
-	,firstElement: function() {
-		if(this.nodeType != Xml.Document && this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		var _g = 0;
-		var _g1 = this.children;
-		while(_g < _g1.length) {
-			var child = _g1[_g];
-			++_g;
-			if(child.nodeType == Xml.Element) {
-				return child;
-			}
-		}
-		return null;
-	}
-	,addChild: function(x) {
-		if(this.nodeType != Xml.Document && this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		if(x.parent != null) {
-			x.parent.removeChild(x);
-		}
-		this.children.push(x);
-		x.parent = this;
-	}
-	,removeChild: function(x) {
-		if(this.nodeType != Xml.Document && this.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (this.nodeType == null ? "null" : XmlType.toString(this.nodeType)));
-		}
-		if(HxOverrides.remove(this.children,x)) {
-			x.parent = null;
-			return true;
-		}
-		return false;
-	}
-	,toString: function() {
-		return haxe_xml_Printer.print(this);
-	}
-	,__class__: Xml
-};
 var format_gif_Block = $hxEnums["format.gif.Block"] = { __ename__ : true, __constructs__ : ["BFrame","BExtension","BEOF"]
 	,BFrame: ($_=function(frame) { return {_hx_index:0,frame:frame,__enum__:"format.gif.Block",toString:$estr}; },$_.__params__ = ["frame"],$_)
 	,BExtension: ($_=function(extension) { return {_hx_index:1,extension:extension,__enum__:"format.gif.Block",toString:$estr}; },$_.__params__ = ["extension"],$_)
@@ -39879,18 +39633,6 @@ haxe_io_Input.prototype = {
 		}
 		return s;
 	}
-	,readUntil: function(end) {
-		var buf = new haxe_io_BytesBuffer();
-		var last;
-		while(true) {
-			last = this.readByte();
-			if(!(last != end)) {
-				break;
-			}
-			buf.addByte(last);
-		}
-		return buf.getBytes().toString();
-	}
 	,readFloat: function() {
 		return haxe_io_FPHelper.i32ToFloat(this.readInt32());
 	}
@@ -39968,16 +39710,7 @@ $hxClasses["haxe.io.BytesInput"] = haxe_io_BytesInput;
 haxe_io_BytesInput.__name__ = "haxe.io.BytesInput";
 haxe_io_BytesInput.__super__ = haxe_io_Input;
 haxe_io_BytesInput.prototype = $extend(haxe_io_Input.prototype,{
-	set_position: function(p) {
-		if(p < 0) {
-			p = 0;
-		} else if(p > this.totlen) {
-			p = this.totlen;
-		}
-		this.len = this.totlen - p;
-		return this.pos = p;
-	}
-	,readByte: function() {
+	readByte: function() {
 		if(this.len == 0) {
 			throw haxe_Exception.thrown(new haxe_io_Eof());
 		}
@@ -40152,13 +39885,6 @@ var haxe_io_Path = function(path) {
 };
 $hxClasses["haxe.io.Path"] = haxe_io_Path;
 haxe_io_Path.__name__ = "haxe.io.Path";
-haxe_io_Path.directory = function(path) {
-	var s = new haxe_io_Path(path);
-	if(s.dir == null) {
-		return "";
-	}
-	return s.dir;
-};
 haxe_io_Path.extension = function(path) {
 	var s = new haxe_io_Path(path);
 	if(s.ext == null) {
@@ -40170,119 +39896,6 @@ haxe_io_Path.withExtension = function(path,ext) {
 	var s = new haxe_io_Path(path);
 	s.ext = ext;
 	return s.toString();
-};
-haxe_io_Path.join = function(paths) {
-	var _g = [];
-	var _g1 = 0;
-	var _g2 = paths;
-	while(_g1 < _g2.length) {
-		var v = _g2[_g1];
-		++_g1;
-		if(v != null && v != "") {
-			_g.push(v);
-		}
-	}
-	var paths = _g;
-	if(paths.length == 0) {
-		return "";
-	}
-	var path = paths[0];
-	var _g = 1;
-	var _g1 = paths.length;
-	while(_g < _g1) {
-		var i = _g++;
-		path = haxe_io_Path.addTrailingSlash(path);
-		path += paths[i];
-	}
-	return haxe_io_Path.normalize(path);
-};
-haxe_io_Path.normalize = function(path) {
-	var slash = "/";
-	path = path.split("\\").join(slash);
-	if(path == slash) {
-		return slash;
-	}
-	var target = [];
-	var _g = 0;
-	var _g1 = path.split(slash);
-	while(_g < _g1.length) {
-		var token = _g1[_g];
-		++_g;
-		if(token == ".." && target.length > 0 && target[target.length - 1] != "..") {
-			target.pop();
-		} else if(token == "") {
-			if(target.length > 0 || HxOverrides.cca(path,0) == 47) {
-				target.push(token);
-			}
-		} else if(token != ".") {
-			target.push(token);
-		}
-	}
-	var tmp = target.join(slash);
-	var acc_b = "";
-	var colon = false;
-	var slashes = false;
-	var _g2_offset = 0;
-	var _g2_s = tmp;
-	while(_g2_offset < _g2_s.length) {
-		var s = _g2_s;
-		var index = _g2_offset++;
-		var c = s.charCodeAt(index);
-		if(c >= 55296 && c <= 56319) {
-			c = c - 55232 << 10 | s.charCodeAt(index + 1) & 1023;
-		}
-		var c1 = c;
-		if(c1 >= 65536) {
-			++_g2_offset;
-		}
-		var c2 = c1;
-		switch(c2) {
-		case 47:
-			if(!colon) {
-				slashes = true;
-			} else {
-				var i = c2;
-				colon = false;
-				if(slashes) {
-					acc_b += "/";
-					slashes = false;
-				}
-				acc_b += String.fromCodePoint(i);
-			}
-			break;
-		case 58:
-			acc_b += ":";
-			colon = true;
-			break;
-		default:
-			var i1 = c2;
-			colon = false;
-			if(slashes) {
-				acc_b += "/";
-				slashes = false;
-			}
-			acc_b += String.fromCodePoint(i1);
-		}
-	}
-	return acc_b;
-};
-haxe_io_Path.addTrailingSlash = function(path) {
-	if(path.length == 0) {
-		return "/";
-	}
-	var c1 = path.lastIndexOf("/");
-	var c2 = path.lastIndexOf("\\");
-	if(c1 < c2) {
-		if(c2 != path.length - 1) {
-			return path + "\\";
-		} else {
-			return path;
-		}
-	} else if(c1 != path.length - 1) {
-		return path + "/";
-	} else {
-		return path;
-	}
 };
 haxe_io_Path.prototype = {
 	toString: function() {
@@ -40340,577 +39953,6 @@ var haxe_macro_Unop = $hxEnums["haxe.macro.Unop"] = { __ename__ : true, __constr
 	,OpNegBits: {_hx_index:4,__enum__:"haxe.macro.Unop",toString:$estr}
 };
 haxe_macro_Unop.__empty_constructs__ = [haxe_macro_Unop.OpIncrement,haxe_macro_Unop.OpDecrement,haxe_macro_Unop.OpNot,haxe_macro_Unop.OpNeg,haxe_macro_Unop.OpNegBits];
-var haxe_xml__$Access_NodeAccess = {};
-haxe_xml__$Access_NodeAccess.resolve = function(this1,name) {
-	var x = this1.elementsNamed(name).next();
-	if(x == null) {
-		var xname;
-		if(this1.nodeType == Xml.Document) {
-			xname = "Document";
-		} else {
-			if(this1.nodeType != Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, expected Element but found " + (this1.nodeType == null ? "null" : XmlType.toString(this1.nodeType)));
-			}
-			xname = this1.nodeName;
-		}
-		throw haxe_Exception.thrown(xname + " is missing element " + name);
-	}
-	if(x.nodeType != Xml.Document && x.nodeType != Xml.Element) {
-		throw haxe_Exception.thrown("Invalid nodeType " + (x.nodeType == null ? "null" : XmlType.toString(x.nodeType)));
-	}
-	var this1 = x;
-	return this1;
-};
-var haxe_xml__$Access_AttribAccess = {};
-haxe_xml__$Access_AttribAccess.resolve = function(this1,name) {
-	if(this1.nodeType == Xml.Document) {
-		throw haxe_Exception.thrown("Cannot access document attribute " + name);
-	}
-	var v = this1.get(name);
-	if(v == null) {
-		if(this1.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element but found " + (this1.nodeType == null ? "null" : XmlType.toString(this1.nodeType)));
-		}
-		throw haxe_Exception.thrown(this1.nodeName + " is missing attribute " + name);
-	}
-	return v;
-};
-var haxe_xml__$Access_HasNodeAccess = {};
-haxe_xml__$Access_HasNodeAccess.resolve = function(this1,name) {
-	return this1.elementsNamed(name).hasNext();
-};
-var haxe_xml_XmlParserException = function(message,xml,position) {
-	this.xml = xml;
-	this.message = message;
-	this.position = position;
-	this.lineNumber = 1;
-	this.positionAtLine = 0;
-	var _g = 0;
-	var _g1 = position;
-	while(_g < _g1) {
-		var i = _g++;
-		var c = xml.charCodeAt(i);
-		if(c == 10) {
-			this.lineNumber++;
-			this.positionAtLine = 0;
-		} else if(c != 13) {
-			this.positionAtLine++;
-		}
-	}
-};
-$hxClasses["haxe.xml.XmlParserException"] = haxe_xml_XmlParserException;
-haxe_xml_XmlParserException.__name__ = "haxe.xml.XmlParserException";
-haxe_xml_XmlParserException.prototype = {
-	toString: function() {
-		var c = js_Boot.getClass(this);
-		return c.__name__ + ": " + this.message + " at line " + this.lineNumber + " char " + this.positionAtLine;
-	}
-	,__class__: haxe_xml_XmlParserException
-};
-var haxe_xml_Parser = function() { };
-$hxClasses["haxe.xml.Parser"] = haxe_xml_Parser;
-haxe_xml_Parser.__name__ = "haxe.xml.Parser";
-haxe_xml_Parser.parse = function(str,strict) {
-	if(strict == null) {
-		strict = false;
-	}
-	var doc = Xml.createDocument();
-	haxe_xml_Parser.doParse(str,strict,0,doc);
-	return doc;
-};
-haxe_xml_Parser.doParse = function(str,strict,p,parent) {
-	if(p == null) {
-		p = 0;
-	}
-	var xml = null;
-	var state = 1;
-	var next = 1;
-	var aname = null;
-	var start = 0;
-	var nsubs = 0;
-	var nbrackets = 0;
-	var c = str.charCodeAt(p);
-	var buf = new StringBuf();
-	var escapeNext = 1;
-	var attrValQuote = -1;
-	while(c == c) {
-		switch(state) {
-		case 0:
-			switch(c) {
-			case 9:case 10:case 13:case 32:
-				break;
-			default:
-				state = next;
-				continue;
-			}
-			break;
-		case 1:
-			if(c == 60) {
-				state = 0;
-				next = 2;
-			} else {
-				start = p;
-				state = 13;
-				continue;
-			}
-			break;
-		case 2:
-			switch(c) {
-			case 33:
-				if(str.charCodeAt(p + 1) == 91) {
-					p += 2;
-					if(HxOverrides.substr(str,p,6).toUpperCase() != "CDATA[") {
-						throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected <![CDATA[",str,p));
-					}
-					p += 5;
-					state = 17;
-					start = p + 1;
-				} else if(str.charCodeAt(p + 1) == 68 || str.charCodeAt(p + 1) == 100) {
-					if(HxOverrides.substr(str,p + 2,6).toUpperCase() != "OCTYPE") {
-						throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected <!DOCTYPE",str,p));
-					}
-					p += 8;
-					state = 16;
-					start = p + 1;
-				} else if(str.charCodeAt(p + 1) != 45 || str.charCodeAt(p + 2) != 45) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected <!--",str,p));
-				} else {
-					p += 2;
-					state = 15;
-					start = p + 1;
-				}
-				break;
-			case 47:
-				if(parent == null) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected node name",str,p));
-				}
-				start = p + 1;
-				state = 0;
-				next = 10;
-				break;
-			case 63:
-				state = 14;
-				start = p;
-				break;
-			default:
-				state = 3;
-				start = p;
-				continue;
-			}
-			break;
-		case 3:
-			if(!(c >= 97 && c <= 122 || c >= 65 && c <= 90 || c >= 48 && c <= 57 || c == 58 || c == 46 || c == 95 || c == 45)) {
-				if(p == start) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected node name",str,p));
-				}
-				xml = Xml.createElement(HxOverrides.substr(str,start,p - start));
-				parent.addChild(xml);
-				++nsubs;
-				state = 0;
-				next = 4;
-				continue;
-			}
-			break;
-		case 4:
-			switch(c) {
-			case 47:
-				state = 11;
-				break;
-			case 62:
-				state = 9;
-				break;
-			default:
-				state = 5;
-				start = p;
-				continue;
-			}
-			break;
-		case 5:
-			if(!(c >= 97 && c <= 122 || c >= 65 && c <= 90 || c >= 48 && c <= 57 || c == 58 || c == 46 || c == 95 || c == 45)) {
-				if(start == p) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected attribute name",str,p));
-				}
-				var tmp = HxOverrides.substr(str,start,p - start);
-				aname = tmp;
-				if(xml.exists(aname)) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Duplicate attribute [" + aname + "]",str,p));
-				}
-				state = 0;
-				next = 6;
-				continue;
-			}
-			break;
-		case 6:
-			if(c == 61) {
-				state = 0;
-				next = 7;
-			} else {
-				throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected =",str,p));
-			}
-			break;
-		case 7:
-			switch(c) {
-			case 34:case 39:
-				buf = new StringBuf();
-				state = 8;
-				start = p + 1;
-				attrValQuote = c;
-				break;
-			default:
-				throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected \"",str,p));
-			}
-			break;
-		case 8:
-			switch(c) {
-			case 38:
-				var len = p - start;
-				buf.b += len == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len);
-				state = 18;
-				escapeNext = 8;
-				start = p + 1;
-				break;
-			case 60:case 62:
-				if(strict) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Invalid unescaped " + String.fromCodePoint(c) + " in attribute value",str,p));
-				} else if(c == attrValQuote) {
-					var len1 = p - start;
-					buf.b += len1 == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len1);
-					var val = buf.b;
-					buf = new StringBuf();
-					xml.set(aname,val);
-					state = 0;
-					next = 4;
-				}
-				break;
-			default:
-				if(c == attrValQuote) {
-					var len2 = p - start;
-					buf.b += len2 == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len2);
-					var val1 = buf.b;
-					buf = new StringBuf();
-					xml.set(aname,val1);
-					state = 0;
-					next = 4;
-				}
-			}
-			break;
-		case 9:
-			p = haxe_xml_Parser.doParse(str,strict,p,xml);
-			start = p;
-			state = 1;
-			break;
-		case 10:
-			if(!(c >= 97 && c <= 122 || c >= 65 && c <= 90 || c >= 48 && c <= 57 || c == 58 || c == 46 || c == 95 || c == 45)) {
-				if(start == p) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected node name",str,p));
-				}
-				var v = HxOverrides.substr(str,start,p - start);
-				if(parent == null || parent.nodeType != 0) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Unexpected </" + v + ">, tag is not open",str,p));
-				}
-				if(parent.nodeType != Xml.Element) {
-					throw haxe_Exception.thrown("Bad node type, expected Element but found " + (parent.nodeType == null ? "null" : XmlType.toString(parent.nodeType)));
-				}
-				if(v != parent.nodeName) {
-					if(parent.nodeType != Xml.Element) {
-						throw haxe_Exception.thrown("Bad node type, expected Element but found " + (parent.nodeType == null ? "null" : XmlType.toString(parent.nodeType)));
-					}
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected </" + parent.nodeName + ">",str,p));
-				}
-				state = 0;
-				next = 12;
-				continue;
-			}
-			break;
-		case 11:
-			if(c == 62) {
-				state = 1;
-			} else {
-				throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected >",str,p));
-			}
-			break;
-		case 12:
-			if(c == 62) {
-				if(nsubs == 0) {
-					parent.addChild(Xml.createPCData(""));
-				}
-				return p;
-			} else {
-				throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Expected >",str,p));
-			}
-			break;
-		case 13:
-			if(c == 60) {
-				var len3 = p - start;
-				buf.b += len3 == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len3);
-				var child = Xml.createPCData(buf.b);
-				buf = new StringBuf();
-				parent.addChild(child);
-				++nsubs;
-				state = 0;
-				next = 2;
-			} else if(c == 38) {
-				var len4 = p - start;
-				buf.b += len4 == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len4);
-				state = 18;
-				escapeNext = 13;
-				start = p + 1;
-			}
-			break;
-		case 14:
-			if(c == 63 && str.charCodeAt(p + 1) == 62) {
-				++p;
-				var str1 = HxOverrides.substr(str,start + 1,p - start - 2);
-				parent.addChild(Xml.createProcessingInstruction(str1));
-				++nsubs;
-				state = 1;
-			}
-			break;
-		case 15:
-			if(c == 45 && str.charCodeAt(p + 1) == 45 && str.charCodeAt(p + 2) == 62) {
-				parent.addChild(Xml.createComment(HxOverrides.substr(str,start,p - start)));
-				++nsubs;
-				p += 2;
-				state = 1;
-			}
-			break;
-		case 16:
-			if(c == 91) {
-				++nbrackets;
-			} else if(c == 93) {
-				--nbrackets;
-			} else if(c == 62 && nbrackets == 0) {
-				parent.addChild(Xml.createDocType(HxOverrides.substr(str,start,p - start)));
-				++nsubs;
-				state = 1;
-			}
-			break;
-		case 17:
-			if(c == 93 && str.charCodeAt(p + 1) == 93 && str.charCodeAt(p + 2) == 62) {
-				var child1 = Xml.createCData(HxOverrides.substr(str,start,p - start));
-				parent.addChild(child1);
-				++nsubs;
-				p += 2;
-				state = 1;
-			}
-			break;
-		case 18:
-			if(c == 59) {
-				var s = HxOverrides.substr(str,start,p - start);
-				if(s.charCodeAt(0) == 35) {
-					var c1 = s.charCodeAt(1) == 120 ? Std.parseInt("0" + HxOverrides.substr(s,1,s.length - 1)) : Std.parseInt(HxOverrides.substr(s,1,s.length - 1));
-					buf.b += String.fromCodePoint(c1);
-				} else if(!Object.prototype.hasOwnProperty.call(haxe_xml_Parser.escapes.h,s)) {
-					if(strict) {
-						throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Undefined entity: " + s,str,p));
-					}
-					buf.b += Std.string("&" + s + ";");
-				} else {
-					buf.b += Std.string(haxe_xml_Parser.escapes.h[s]);
-				}
-				start = p + 1;
-				state = escapeNext;
-			} else if(!(c >= 97 && c <= 122 || c >= 65 && c <= 90 || c >= 48 && c <= 57 || c == 58 || c == 46 || c == 95 || c == 45) && c != 35) {
-				if(strict) {
-					throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Invalid character in entity: " + String.fromCodePoint(c),str,p));
-				}
-				buf.b += String.fromCodePoint(38);
-				var len5 = p - start;
-				buf.b += len5 == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len5);
-				--p;
-				start = p + 1;
-				state = escapeNext;
-			}
-			break;
-		}
-		c = str.charCodeAt(++p);
-	}
-	if(state == 1) {
-		start = p;
-		state = 13;
-	}
-	if(state == 13) {
-		if(parent.nodeType == 0) {
-			if(parent.nodeType != Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, expected Element but found " + (parent.nodeType == null ? "null" : XmlType.toString(parent.nodeType)));
-			}
-			throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Unclosed node <" + parent.nodeName + ">",str,p));
-		}
-		if(p != start || nsubs == 0) {
-			var len = p - start;
-			buf.b += len == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len);
-			parent.addChild(Xml.createPCData(buf.b));
-			++nsubs;
-		}
-		return p;
-	}
-	if(!strict && state == 18 && escapeNext == 13) {
-		buf.b += String.fromCodePoint(38);
-		var len = p - start;
-		buf.b += len == null ? HxOverrides.substr(str,start,null) : HxOverrides.substr(str,start,len);
-		parent.addChild(Xml.createPCData(buf.b));
-		++nsubs;
-		return p;
-	}
-	throw haxe_Exception.thrown(new haxe_xml_XmlParserException("Unexpected end",str,p));
-};
-var haxe_xml_Printer = function(pretty) {
-	this.output = new StringBuf();
-	this.pretty = pretty;
-};
-$hxClasses["haxe.xml.Printer"] = haxe_xml_Printer;
-haxe_xml_Printer.__name__ = "haxe.xml.Printer";
-haxe_xml_Printer.print = function(xml,pretty) {
-	if(pretty == null) {
-		pretty = false;
-	}
-	var printer = new haxe_xml_Printer(pretty);
-	printer.writeNode(xml,"");
-	return printer.output.b;
-};
-haxe_xml_Printer.prototype = {
-	writeNode: function(value,tabs) {
-		switch(value.nodeType) {
-		case 0:
-			this.output.b += Std.string(tabs + "<");
-			if(value.nodeType != Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, expected Element but found " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			this.output.b += Std.string(value.nodeName);
-			var attribute = value.attributes();
-			while(attribute.hasNext()) {
-				var attribute1 = attribute.next();
-				this.output.b += Std.string(" " + attribute1 + "=\"");
-				var input = StringTools.htmlEscape(value.get(attribute1),true);
-				this.output.b += Std.string(input);
-				this.output.b += "\"";
-			}
-			if(this.hasChildren(value)) {
-				this.output.b += ">";
-				if(this.pretty) {
-					this.output.b += "\n";
-				}
-				if(value.nodeType != Xml.Document && value.nodeType != Xml.Element) {
-					throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-				}
-				var _g_current = 0;
-				var _g_array = value.children;
-				while(_g_current < _g_array.length) {
-					var child = _g_array[_g_current++];
-					this.writeNode(child,this.pretty ? tabs + "\t" : tabs);
-				}
-				this.output.b += Std.string(tabs + "</");
-				if(value.nodeType != Xml.Element) {
-					throw haxe_Exception.thrown("Bad node type, expected Element but found " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-				}
-				this.output.b += Std.string(value.nodeName);
-				this.output.b += ">";
-				if(this.pretty) {
-					this.output.b += "\n";
-				}
-			} else {
-				this.output.b += "/>";
-				if(this.pretty) {
-					this.output.b += "\n";
-				}
-			}
-			break;
-		case 1:
-			if(value.nodeType == Xml.Document || value.nodeType == Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, unexpected " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			var nodeValue = value.nodeValue;
-			if(nodeValue.length != 0) {
-				var input = tabs + StringTools.htmlEscape(nodeValue);
-				this.output.b += Std.string(input);
-				if(this.pretty) {
-					this.output.b += "\n";
-				}
-			}
-			break;
-		case 2:
-			this.output.b += Std.string(tabs + "<![CDATA[");
-			if(value.nodeType == Xml.Document || value.nodeType == Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, unexpected " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			this.output.b += Std.string(value.nodeValue);
-			this.output.b += "]]>";
-			if(this.pretty) {
-				this.output.b += "\n";
-			}
-			break;
-		case 3:
-			if(value.nodeType == Xml.Document || value.nodeType == Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, unexpected " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			var commentContent = value.nodeValue;
-			var _this_r = new RegExp("[\n\r\t]+","g".split("u").join(""));
-			commentContent = commentContent.replace(_this_r,"");
-			commentContent = "<!--" + commentContent + "-->";
-			this.output.b += tabs == null ? "null" : "" + tabs;
-			var input = StringTools.trim(commentContent);
-			this.output.b += Std.string(input);
-			if(this.pretty) {
-				this.output.b += "\n";
-			}
-			break;
-		case 4:
-			if(value.nodeType == Xml.Document || value.nodeType == Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, unexpected " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			this.output.b += Std.string("<!DOCTYPE " + value.nodeValue + ">");
-			if(this.pretty) {
-				this.output.b += "\n";
-			}
-			break;
-		case 5:
-			if(value.nodeType == Xml.Document || value.nodeType == Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, unexpected " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			this.output.b += Std.string("<?" + value.nodeValue + "?>");
-			if(this.pretty) {
-				this.output.b += "\n";
-			}
-			break;
-		case 6:
-			if(value.nodeType != Xml.Document && value.nodeType != Xml.Element) {
-				throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-			}
-			var _g_current = 0;
-			var _g_array = value.children;
-			while(_g_current < _g_array.length) {
-				var child = _g_array[_g_current++];
-				this.writeNode(child,tabs);
-			}
-			break;
-		}
-	}
-	,hasChildren: function(value) {
-		if(value.nodeType != Xml.Document && value.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Bad node type, expected Element or Document but found " + (value.nodeType == null ? "null" : XmlType.toString(value.nodeType)));
-		}
-		var _g_current = 0;
-		var _g_array = value.children;
-		while(_g_current < _g_array.length) {
-			var child = _g_array[_g_current++];
-			switch(child.nodeType) {
-			case 0:case 1:
-				return true;
-			case 2:case 3:
-				if(child.nodeType == Xml.Document || child.nodeType == Xml.Element) {
-					throw haxe_Exception.thrown("Bad node type, unexpected " + (child.nodeType == null ? "null" : XmlType.toString(child.nodeType)));
-				}
-				if(StringTools.ltrim(child.nodeValue).length != 0) {
-					return true;
-				}
-				break;
-			default:
-			}
-		}
-		return false;
-	}
-	,__class__: haxe_xml_Printer
-};
 var haxe_zip_Compress = function() { };
 $hxClasses["haxe.zip.Compress"] = haxe_zip_Compress;
 haxe_zip_Compress.__name__ = "haxe.zip.Compress";
@@ -45450,431 +44492,6 @@ hxd_earcut_Earcut.prototype = {
 	}
 	,__class__: hxd_earcut_Earcut
 };
-var hxd_fmt_bfnt_FontParser = function() { };
-$hxClasses["hxd.fmt.bfnt.FontParser"] = hxd_fmt_bfnt_FontParser;
-hxd_fmt_bfnt_FontParser.__name__ = "hxd.fmt.bfnt.FontParser";
-hxd_fmt_bfnt_FontParser.parse = function(bytes,path,resolveTile) {
-	var tile = null;
-	var font = new h2d_Font(null,0);
-	var glyphs = font.glyphs;
-	font.baseLine = 0;
-	var _g = bytes.getInt32(0);
-	switch(_g) {
-	case 54938946:
-		var bytes1 = new haxe_io_BytesInput(bytes);
-		var _g1 = bytes1;
-		_g1.set_position(_g1.pos + 4);
-		var pageCount = 0;
-		while(bytes1.pos < bytes1.totlen) {
-			var id = bytes1.readByte();
-			var length = bytes1.readInt32();
-			var pos = bytes1.pos;
-			switch(id) {
-			case 1:
-				font.size = font.initSize = bytes1.readInt16();
-				var _g1 = bytes1;
-				_g1.set_position(_g1.pos + 12);
-				font.name = bytes1.readUntil(0);
-				break;
-			case 2:
-				font.lineHeight = bytes1.readUInt16();
-				font.baseLine = bytes1.readUInt16();
-				var _g2 = bytes1;
-				_g2.set_position(_g2.pos + 4);
-				pageCount = bytes1.readUInt16();
-				if(pageCount != 1) {
-					haxe_Log.trace("Warning: BMF format only supports one page at the moment.",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 224, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-				}
-				break;
-			case 3:
-				var name = bytes1.readUntil(0);
-				try {
-					font.tilePath = name;
-					tile = resolveTile(haxe_io_Path.join([haxe_io_Path.directory(path),name]));
-				} catch( _g3 ) {
-					haxe_Log.trace("Warning: Could not find referenced font texture at \"" + name + "\", trying to resolve same name as fnt!",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 30, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-					font.tilePath = new haxe_io_Path(path).file + ".png";
-					tile = resolveTile(haxe_io_Path.withExtension(path,"png"));
-				}
-				break;
-			case 4:
-				var count = length / 20 | 0;
-				while(count > 0) {
-					var cid = bytes1.readInt32();
-					var t = tile.sub(bytes1.readUInt16(),bytes1.readUInt16(),bytes1.readUInt16(),bytes1.readUInt16(),bytes1.readInt16(),bytes1.readInt16());
-					var fc = new h2d_FontChar(t,bytes1.readInt16());
-					glyphs.h[cid] = fc;
-					var _g4 = bytes1;
-					_g4.set_position(_g4.pos + 2);
-					--count;
-				}
-				break;
-			case 5:
-				var count1 = length / 10 | 0;
-				while(count1 > 0) {
-					var first = bytes1.readInt32();
-					var key = bytes1.readInt32();
-					var fc1 = glyphs.h[key];
-					if(fc1 != null) {
-						fc1.addKerning(first,bytes1.readInt16());
-					} else {
-						var _g5 = bytes1;
-						_g5.set_position(_g5.pos + 2);
-					}
-					--count1;
-				}
-				break;
-			}
-			bytes1.set_position(pos + length);
-		}
-		break;
-	case 1414415938:
-		return new hxd_fmt_bfnt_Reader(new haxe_io_BytesInput(bytes)).read(function(tp) {
-			try {
-				font.tilePath = tp;
-				tile = resolveTile(haxe_io_Path.join([haxe_io_Path.directory(path),tp]));
-			} catch( _g ) {
-				haxe_Log.trace("Warning: Could not find referenced font texture at \"" + tp + "\", trying to resolve same name as fnt!",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 30, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-				font.tilePath = new haxe_io_Path(path).file + ".png";
-				tile = resolveTile(haxe_io_Path.withExtension(path,"png"));
-			}
-			return tile;
-		});
-	case 1836597052:case 1852794428:
-		var xml = Xml.parse(bytes.toString());
-		var x = xml.firstElement();
-		if(x.nodeType != Xml.Document && x.nodeType != Xml.Element) {
-			throw haxe_Exception.thrown("Invalid nodeType " + (x.nodeType == null ? "null" : XmlType.toString(x.nodeType)));
-		}
-		var this1 = x;
-		var xml = this1;
-		if(haxe_xml__$Access_HasNodeAccess.resolve(xml,"info")) {
-			var tmp = haxe_xml__$Access_NodeAccess.resolve(xml,"info");
-			font.name = haxe_xml__$Access_AttribAccess.resolve(tmp,"face");
-			var tmp = haxe_xml__$Access_AttribAccess.resolve(haxe_xml__$Access_NodeAccess.resolve(xml,"info"),"size");
-			font.size = font.initSize = Std.parseInt(tmp);
-			var tmp = haxe_xml__$Access_AttribAccess.resolve(haxe_xml__$Access_NodeAccess.resolve(xml,"common"),"lineHeight");
-			font.lineHeight = Std.parseInt(tmp);
-			var tmp = haxe_xml__$Access_AttribAccess.resolve(haxe_xml__$Access_NodeAccess.resolve(xml,"common"),"base");
-			font.baseLine = Std.parseInt(tmp);
-			var p = haxe_xml__$Access_NodeAccess.resolve(xml,"pages").elements();
-			while(p.hasNext()) {
-				var p1 = p.next();
-				if(haxe_xml__$Access_AttribAccess.resolve(p1,"id") == "0") {
-					var tilePath = haxe_xml__$Access_AttribAccess.resolve(p1,"file");
-					try {
-						font.tilePath = tilePath;
-						tile = resolveTile(haxe_io_Path.join([haxe_io_Path.directory(path),tilePath]));
-					} catch( _g1 ) {
-						haxe_Log.trace("Warning: Could not find referenced font texture at \"" + tilePath + "\", trying to resolve same name as fnt!",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 30, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-						font.tilePath = new haxe_io_Path(path).file + ".png";
-						tile = resolveTile(haxe_io_Path.withExtension(path,"png"));
-					}
-				} else {
-					haxe_Log.trace("Warning: BMF format only supports one page at the moment.",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 66, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-				}
-			}
-			var chars = haxe_xml__$Access_NodeAccess.resolve(xml,"chars").elements();
-			var c = chars;
-			while(c.hasNext()) {
-				var c1 = c.next();
-				var t = tile.sub(Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"x")),Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"y")),Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"width")),Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"height")),Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"xoffset")),Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"yoffset")));
-				var fc = new h2d_FontChar(t,Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"xadvance")));
-				var kerns = haxe_xml__$Access_NodeAccess.resolve(xml,"kernings").elements();
-				var k = kerns;
-				while(k.hasNext()) {
-					var k1 = k.next();
-					if(haxe_xml__$Access_AttribAccess.resolve(k1,"second") == haxe_xml__$Access_AttribAccess.resolve(c1,"id")) {
-						fc.addKerning(Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(k1,"first")),Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(k1,"amount")));
-					}
-				}
-				var key = Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"id"));
-				glyphs.h[key] = fc;
-			}
-		} else {
-			font.tilePath = new haxe_io_Path(path).file + ".png";
-			tile = resolveTile(haxe_io_Path.withExtension(path,"png"));
-			font.name = haxe_xml__$Access_AttribAccess.resolve(xml,"family");
-			var tmp = haxe_xml__$Access_AttribAccess.resolve(xml,"size");
-			font.size = font.initSize = Std.parseInt(tmp);
-			var tmp = haxe_xml__$Access_AttribAccess.resolve(xml,"height");
-			font.lineHeight = Std.parseInt(tmp);
-			var kernings = [];
-			var c = xml.elements();
-			while(c.hasNext()) {
-				var c1 = c.next();
-				var r = haxe_xml__$Access_AttribAccess.resolve(c1,"rect").split(" ");
-				var o = haxe_xml__$Access_AttribAccess.resolve(c1,"offset").split(" ");
-				var t = tile.sub(Std.parseInt(r[0]),Std.parseInt(r[1]),Std.parseInt(r[2]),Std.parseInt(r[3]),Std.parseInt(o[0]),Std.parseInt(o[1]));
-				var fc = new h2d_FontChar(t,Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(c1,"width")) - 1);
-				var code = haxe_xml__$Access_AttribAccess.resolve(c1,"code");
-				var code1 = StringTools.startsWith(code,"&#") ? Std.parseInt(HxOverrides.substr(code,2,code.length - 3)) : HxOverrides.cca(code,0);
-				var k = c1.elements();
-				while(k.hasNext()) {
-					var k1 = k.next();
-					var code2 = haxe_xml__$Access_AttribAccess.resolve(k1,"id");
-					var next = StringTools.startsWith(code2,"&#") ? Std.parseInt(HxOverrides.substr(code2,2,code2.length - 3)) : HxOverrides.cca(code2,0);
-					var adv = Std.parseInt(haxe_xml__$Access_AttribAccess.resolve(k1,"advance"));
-					if(glyphs.h.hasOwnProperty(next)) {
-						glyphs.h[next].addKerning(code1,adv);
-					} else {
-						kernings.push({ prev : code1, next : next, adv : adv});
-					}
-				}
-				glyphs.h[code1] = fc;
-			}
-			var _g1 = 0;
-			while(_g1 < kernings.length) {
-				var k = kernings[_g1];
-				++_g1;
-				var g = glyphs.h[k.next];
-				if(g == null) {
-					continue;
-				}
-				g.addKerning(k.prev,k.adv);
-			}
-		}
-		break;
-	case 1868983913:
-		var lines = bytes.toString().split("\n");
-		var reg = new EReg(" *?([0-9a-zA-Z]+)=(\"[^\"]+\"|.+?)(?:[ \r]|$)","");
-		var idx;
-		var pageCount = 0;
-		var _g1 = 0;
-		while(_g1 < lines.length) {
-			var line = lines[_g1];
-			++_g1;
-			idx = line.indexOf(" ");
-			switch(HxOverrides.substr(line,0,idx)) {
-			case "char":
-				var id = 0;
-				var x = 0;
-				var y = 0;
-				var width = 0;
-				var height = 0;
-				var xoffset = 0;
-				var yoffset = 0;
-				var xadvance = 0;
-				while(idx < line.length && reg.matchSub(line,idx)) {
-					switch(reg.matched(1)) {
-					case "height":
-						var v = reg.matched(2);
-						height = Std.parseInt(HxOverrides.cca(v,0) == 34 ? v.substring(1,v.length - 1) : v);
-						break;
-					case "id":
-						var v1 = reg.matched(2);
-						id = Std.parseInt(HxOverrides.cca(v1,0) == 34 ? v1.substring(1,v1.length - 1) : v1);
-						break;
-					case "width":
-						var v2 = reg.matched(2);
-						width = Std.parseInt(HxOverrides.cca(v2,0) == 34 ? v2.substring(1,v2.length - 1) : v2);
-						break;
-					case "x":
-						var v3 = reg.matched(2);
-						x = Std.parseInt(HxOverrides.cca(v3,0) == 34 ? v3.substring(1,v3.length - 1) : v3);
-						break;
-					case "xadvance":
-						var v4 = reg.matched(2);
-						xadvance = Std.parseInt(HxOverrides.cca(v4,0) == 34 ? v4.substring(1,v4.length - 1) : v4);
-						break;
-					case "xoffset":
-						var v5 = reg.matched(2);
-						xoffset = Std.parseInt(HxOverrides.cca(v5,0) == 34 ? v5.substring(1,v5.length - 1) : v5);
-						break;
-					case "y":
-						var v6 = reg.matched(2);
-						y = Std.parseInt(HxOverrides.cca(v6,0) == 34 ? v6.substring(1,v6.length - 1) : v6);
-						break;
-					case "yoffset":
-						var v7 = reg.matched(2);
-						yoffset = Std.parseInt(HxOverrides.cca(v7,0) == 34 ? v7.substring(1,v7.length - 1) : v7);
-						break;
-					}
-					var pos = reg.matchedPos();
-					idx = pos.pos + pos.len;
-				}
-				var t = tile.sub(x,y,width,height,xoffset,yoffset);
-				var fc = new h2d_FontChar(t,xadvance);
-				glyphs.h[id] = fc;
-				break;
-			case "common":
-				while(idx < line.length && reg.matchSub(line,idx)) {
-					switch(reg.matched(1)) {
-					case "base":
-						var v8 = reg.matched(2);
-						font.baseLine = Std.parseInt(HxOverrides.cca(v8,0) == 34 ? v8.substring(1,v8.length - 1) : v8);
-						break;
-					case "lineHeight":
-						var v9 = reg.matched(2);
-						font.lineHeight = Std.parseInt(HxOverrides.cca(v9,0) == 34 ? v9.substring(1,v9.length - 1) : v9);
-						break;
-					case "pages":
-						var v10 = reg.matched(2);
-						pageCount = Std.parseInt(HxOverrides.cca(v10,0) == 34 ? v10.substring(1,v10.length - 1) : v10);
-						if(pageCount != 1) {
-							haxe_Log.trace("Warning: BMF format only supports one page at the moment.",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 157, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-						}
-						break;
-					}
-					var pos1 = reg.matchedPos();
-					idx = pos1.pos + pos1.len;
-				}
-				break;
-			case "info":
-				while(idx < line.length && reg.matchSub(line,idx)) {
-					switch(reg.matched(1)) {
-					case "face":
-						var v11 = reg.matched(2);
-						font.name = HxOverrides.cca(v11,0) == 34 ? v11.substring(1,v11.length - 1) : v11;
-						break;
-					case "size":
-						var v12 = reg.matched(2);
-						font.size = font.initSize = Std.parseInt(HxOverrides.cca(v12,0) == 34 ? v12.substring(1,v12.length - 1) : v12);
-						break;
-					}
-					var pos2 = reg.matchedPos();
-					idx = pos2.pos + pos2.len;
-				}
-				break;
-			case "kerning":
-				var first = 0;
-				var second = 0;
-				var advance = 0;
-				while(idx < line.length && reg.matchSub(line,idx)) {
-					switch(reg.matched(1)) {
-					case "amount":
-						var v13 = reg.matched(2);
-						advance = Std.parseInt(HxOverrides.cca(v13,0) == 34 ? v13.substring(1,v13.length - 1) : v13);
-						break;
-					case "first":
-						var v14 = reg.matched(2);
-						first = Std.parseInt(HxOverrides.cca(v14,0) == 34 ? v14.substring(1,v14.length - 1) : v14);
-						break;
-					case "second":
-						var v15 = reg.matched(2);
-						second = Std.parseInt(HxOverrides.cca(v15,0) == 34 ? v15.substring(1,v15.length - 1) : v15);
-						break;
-					}
-					var pos3 = reg.matchedPos();
-					idx = pos3.pos + pos3.len;
-				}
-				var fc1 = glyphs.h[second];
-				if(fc1 != null) {
-					fc1.addKerning(first,advance);
-				}
-				break;
-			case "page":
-				while(idx < line.length && reg.matchSub(line,idx)) {
-					if(reg.matched(1) == "file") {
-						var v16 = reg.matched(2);
-						var tilePath = HxOverrides.cca(v16,0) == 34 ? v16.substring(1,v16.length - 1) : v16;
-						try {
-							font.tilePath = tilePath;
-							tile = resolveTile(haxe_io_Path.join([haxe_io_Path.directory(path),tilePath]));
-						} catch( _g2 ) {
-							haxe_Log.trace("Warning: Could not find referenced font texture at \"" + tilePath + "\", trying to resolve same name as fnt!",{ fileName : "hxd/fmt/bfnt/FontParser.hx", lineNumber : 30, className : "hxd.fmt.bfnt.FontParser", methodName : "parse"});
-							font.tilePath = new haxe_io_Path(path).file + ".png";
-							tile = resolveTile(haxe_io_Path.withExtension(path,"png"));
-						}
-					}
-					var pos4 = reg.matchedPos();
-					idx = pos4.pos + pos4.len;
-				}
-				break;
-			}
-		}
-		break;
-	default:
-		var sign = _g;
-		throw haxe_Exception.thrown("Unknown font signature " + StringTools.hex(sign,8));
-	}
-	if(glyphs.h[32] == null) {
-		var value = new h2d_FontChar(tile.sub(0,0,0,0),font.size >> 1);
-		glyphs.h[32] = value;
-	}
-	font.tile = tile;
-	if(font.baseLine == 0) {
-		var padding = 0;
-		var space = glyphs.h[32];
-		if(space != null) {
-			padding = space.t.height * .5;
-		}
-		var a = glyphs.h[65];
-		if(a == null) {
-			a = glyphs.h[97];
-		}
-		if(a == null) {
-			a = glyphs.h[48];
-		}
-		if(a == null) {
-			font.baseLine = font.lineHeight - 2 - padding;
-		} else {
-			font.baseLine = a.t.dy + a.t.height - padding;
-		}
-	}
-	var fallback = glyphs.h[65533];
-	if(fallback == null) {
-		fallback = glyphs.h[9633];
-	}
-	if(fallback == null) {
-		fallback = glyphs.h[63];
-	}
-	if(fallback != null) {
-		font.defaultChar = fallback;
-	}
-	return font;
-};
-var hxd_fmt_bfnt_Reader = function(i) {
-	this.i = i;
-};
-$hxClasses["hxd.fmt.bfnt.Reader"] = hxd_fmt_bfnt_Reader;
-hxd_fmt_bfnt_Reader.__name__ = "hxd.fmt.bfnt.Reader";
-hxd_fmt_bfnt_Reader.parse = function(bytes,resolveTile) {
-	return new hxd_fmt_bfnt_Reader(new haxe_io_BytesInput(bytes)).read(resolveTile);
-};
-hxd_fmt_bfnt_Reader.prototype = {
-	read: function(resolveTile) {
-		if(this.i.readString(4) != "BFNT" || this.i.readByte() != 0) {
-			throw haxe_Exception.thrown("Not a BFNT file!");
-		}
-		var font = null;
-		var _g = this.i.readByte();
-		if(_g == 1) {
-			font = new h2d_Font(this.i.readString(this.i.readUInt16()),this.i.readInt16());
-			font.tilePath = this.i.readString(this.i.readUInt16());
-			var tile = font.tile = resolveTile(font.tilePath);
-			font.lineHeight = this.i.readInt16();
-			font.baseLine = this.i.readInt16();
-			var defaultChar = this.i.readInt32();
-			var id;
-			while(true) {
-				id = this.i.readInt32();
-				if(!(id != 0)) {
-					break;
-				}
-				var t = tile.sub(this.i.readUInt16(),this.i.readUInt16(),this.i.readUInt16(),this.i.readUInt16(),this.i.readInt16(),this.i.readInt16());
-				var glyph = new h2d_FontChar(t,this.i.readInt16());
-				font.glyphs.h[id] = glyph;
-				if(id == defaultChar) {
-					font.defaultChar = glyph;
-				}
-				var prevChar;
-				while(true) {
-					prevChar = this.i.readInt32();
-					if(!(prevChar != 0)) {
-						break;
-					}
-					glyph.addKerning(prevChar,this.i.readInt16());
-				}
-			}
-		} else {
-			var ver = _g;
-			throw haxe_Exception.thrown("Unknown BFNT version: " + ver);
-		}
-		return font;
-	}
-	,__class__: hxd_fmt_bfnt_Reader
-};
 var hxd_fmt_hmd_GeometryDataFormat = {};
 hxd_fmt_hmd_GeometryDataFormat._new = function(v) {
 	var this1 = v;
@@ -48071,86 +46688,6 @@ hxd_res_Any.prototype = $extend(hxd_res_Resource.prototype,{
 	}
 	,__class__: hxd_res_Any
 });
-var hxd_res_BitmapFont = function(entry) {
-	hxd_res_Resource.call(this,entry);
-	this.loader = hxd_res_Loader.currentInstance;
-};
-$hxClasses["hxd.res.BitmapFont"] = hxd_res_BitmapFont;
-hxd_res_BitmapFont.__name__ = "hxd.res.BitmapFont";
-hxd_res_BitmapFont.__super__ = hxd_res_Resource;
-hxd_res_BitmapFont.prototype = $extend(hxd_res_Resource.prototype,{
-	toFont: function() {
-		if(this.font == null) {
-			this.font = hxd_fmt_bfnt_FontParser.parse(this.entry.getBytes(),this.entry.get_path(),$bind(this,this.resolveTile));
-		}
-		return this.font;
-	}
-	,toSdfFont: function(size,channel,alphaCutoff,smoothing) {
-		if(smoothing == null) {
-			smoothing = 0.03125;
-		}
-		if(alphaCutoff == null) {
-			alphaCutoff = 0.5;
-		}
-		if(channel == null) {
-			channel = 0;
-		}
-		if(this.sdfFonts == null) {
-			this.sdfFonts = [];
-		}
-		if(size == null) {
-			size = this.toFont().size;
-		}
-		var _g = 0;
-		var _g1 = this.sdfFonts;
-		while(_g < _g1.length) {
-			var font = _g1[_g];
-			++_g;
-			var _g2 = font.type;
-			if(_g2._hx_index == 1) {
-				var fsmoothing = _g2.smoothing;
-				var falphaCutoff = _g2.alphaCutoff;
-				var fchannel = _g2.channel;
-				if(font.size == size && fchannel == channel && falphaCutoff == alphaCutoff && fsmoothing == smoothing) {
-					return font;
-				}
-			}
-		}
-		var font = hxd_fmt_bfnt_FontParser.parse(this.entry.getBytes(),this.entry.get_path(),$bind(this,this.resolveSdfTile));
-		font.type = h2d_FontType.SignedDistanceField(channel,alphaCutoff,smoothing);
-		font.resizeTo(size);
-		this.sdfFonts.push(font);
-		return font;
-	}
-	,resolveSdfTile: function(path) {
-		var tex = this.loader.load(path).toTexture();
-		tex.set_filter(h3d_mat_Filter.Linear);
-		return h2d_Tile.fromTexture(tex);
-	}
-	,resolveTile: function(path) {
-		return this.loader.load(path).toTile();
-	}
-	,__class__: hxd_res_BitmapFont
-});
-var hxd_res_DefaultFont = function() { };
-$hxClasses["hxd.res.DefaultFont"] = hxd_res_DefaultFont;
-hxd_res_DefaultFont.__name__ = "hxd.res.DefaultFont";
-hxd_res_DefaultFont.get = function() {
-	var engine = h3d_Engine.CURRENT;
-	var fnt = engine.resCache.h[hxd_res_DefaultFont.__id__];
-	if(fnt == null) {
-		var BYTES = hxd_res_Any.fromBytes("hxd/res/defaultFont.png",haxe_Unserializer.run("s3176:iVBORw0KGgoAAAANSUhEUgAAAIAAAACACAYAAADDPmHLAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAOxAAADsQBlSsOGwAACPBJREFUeJztnelypDoMRp2p%:6v3PNjhrlCLX1aLIPBPlWppI03bCG0QOfn8:m0zbr8KupnS9FDqRKAzUOhAvBRfqO:tfrSZ86H:ET79o6Rhc%JzzNSD7Xn:XyEH9RPtP4X:6GDDj6ttR:Hb62d9pmX8b487StA4:DFlup5z5MSWS%tL:f6eG4BXDppGQdtApJEtPm0zkf427Oo1fAxtfO2hDIruGXCLgnAD:jNyzSsKxa18yBphyqQ1jqwBN1zHmgcU3V3jHui9xaArkS0%XzTohOX%jvGauzvjMrlUJXuqSeV07G0ekgTovWS1t61vr0CQAez7nkj7uFIELJqmdN7RWvzil7hnnXV5qLOzSMAmlcQub9ZRuEsaNoq0w5RZbN0rye1ASzplWyAiGEXQVK3kZOdRcgy9:FLoRogI02WNc7rRQw3jzsZAfWB7skR44%3jdo6Wv2qfr4rFuUCZlftrT1jjpezSih4b75ClQDMvrizz%82uA1wMCqsKvUv3YO045rxma2vjY3mpPUvuV1WKDzbLtqfNu9:AjA6tl69QM3Zn1Wfl1M8G:CUW4s6b%sWIEXWtM:omNeXrnaDRm:OyIsE1UOfQ1gCwMOLdFCqWnj8Grl5nsjVakRjHMj1DgnEcQvw%OV0AE0wGisfqTKrbBYrZ4BiB:T4ldE8dPsMxU2oEWgZZtoAyMCq2GxtLlWCFbEB%PGIYWv1kxECq0%TbDKITjpirVr9SW2zC:skqqKdUp%QwwbILKwlgZk2mkBlmUVgPPOI3IbL0GwASY2PiMdbPrfVF6:vVctIq5SoVqNdxtrvWXt1:EguYHVL:ZV4Q8F781%KVwD25r8UagTyYE4TjkllmfrU4udtI%XZdrRcm5c1T%3cPXjq9RqEYTewIrau1a%ODVSBomgeL4cLudedG%H2pah4KBQx8gSnWMC:8AvDKwS0fXU5n59Uf7gAXA1dfG1TtM1Bm2ZtKi%PCGaVlpXKrf67ngeI%uFXoW1WdvNH0ztuV3vNBvAOrC30wR0LG7kX0:p3MjoCqPYfiQNI3BK%BEhq31vfYtS5UkN5lCD%NGWMSBxAWyyeyKkAJYc2Z6JrfqpvGYF0IzxqNWoDoPrSeNJ8POMgtJg76rtSEyDNErGzUF5F3ZOq9wI2D%VtbuBsaFfkNGwBGMtUmy3BjUAtxs3x3LOk8mi7zWB6Xw7leCNlb%LRXkrk%wEOpESIlezxlvM%uSWuzQXNx1Ofjqd5Aah:qW5PGDfbjpZzRCGlbwZ5T0TqMHMVoLgCP56Nj0fqo7mhLOeMGoDPx4wE0sW64mRmXLSDaCZvxPjSeNnAGKx:hxcw8%a3Zkc7tTqjyWgbs:4d3w8wW:7AC42l3zF:dH9H9SGedwO9rmEEz4nMpCXuznFoSS5tf9x9e24ByFjqodKAQio6EjfP9C8duzLHoZ0r8oD%LzRyAZY1XN2umux8n0L3OkeygcdnDzMYTSvQvc47G7g4q3xL2EqE8jhbAN6H9YDJ6TaxBeCduJNy3AjkrghySay8QXOU84lZSQ8plj:ioYuIG%axvLUrcoRxHHGHXelgKzkTWSxtLK:7whM8UaGLzs3qJ7P5IxNI0axh%hbAgxhWMGJ01M%KVKIASXQcipVR7MEz524XboQNoKVwPZPNhkpRjD5yRdM53B0c0qKDvE4X9PVw78JYWPc7usEo9cm1TAa0%R:hh44n1UXz1sjaB0dbJATdGoB:R1Dv:c4DGktSez33TNqW96MZtVo:R53sPLQxvGseCWu7y2d7Kji70MgQRUIwM5nNb%1bc8HyK%MAHiMtq2q5ypaOS39rdTz9jMaac4kg87eDpSsp4%bx:iS3UZLOqMQPM44Y3jGuSoCVabERyaCsj:90qs7TG1soWePZbICViWharvnSgrfTwYsz0gjckvUApHcDOdwa9waDvIGjCFZ:2vwzfVeGj7W%qs4ns0ettbMASJvG:WfJ%JAGHOVvI6GSxtMEUfNENK%FH%NtNaz1qzif7B79mcC2AdbG8zVxyNqMtrGkTQqZWmHUqvJjDJg%BZ9Rf552I8qtY%a:jUMnEG3j9V1RvWgUryfqFyXql1etX2aP:vGER8JWCCLdxhME4OlMbWTdLQCRhA%qX1WegVrZEbtjCjQjsDnKM200Y8nLjDaAx%WdVgg8:zfQY%1620Q8grcxpRDcfQvwMN2ivYm7s4GSRkGZLuRvV5T3AP1tAe08q8qtY38KJo4Ejgglbxh3awCJQyL35l:AjAKwN:5CKozAqpRm7zibBBUCMDJFi:p5GlMKcJUbGAm4aIkdlPCpttK9xz1RxMhzAdVCkDmnE5H:GURPXLta7ypHcz248%GLWR6Q%cL7ZdHRVOddWHPt1VRWX6O1mERXuNt6HmBmooGXnlB178MX3vIr5nhCejkUbf7VhgyalyWwngcjqsorxxg5xy%oDeDZ:Du0Qub%2aP6M%XVfSFK90D6ihjranoC2pUgUVVe0VdUw2bmeEKyASx1OwvWfQ7dPqi1XlFe1Vd0nbu1C:%HEeEObuSH:LyRKzSW6QZKvjDXDNKxqvIsR19a:624vKKvW9Zy5nTw5swQO2zGbODmDNdmpWwBmJ%hNo7n7WAJ5L703FN4DD:Sr3RcK6uar0XVnHvHUbHeDqadawaLFA3jbTwW6tH2aC%5oqgfLXYRGcOab5SKOVvz8sY75AneZATyQd:qyt1ByFjkGoCrR6u8gXLtc2tn:51qD22s7Pwi5Z5jEryNtS6jy6U5qfS8HZwFTWp0ogWdj3Wu0nmPWJ8K3HO62gvoul:dhKbBPPWmp:fdwBXwXNGa8TY92ruBzVG%GpoqnUXtp9CeCdza4JvZLhDqyqb3hT8RRDtH5VmyavKKREn0XCW1f3WiDKWmpTpf7GTQc:F6OpCdC3guJdp5C8CzkTY9JAg8Ekh:bxaAPxVMf28WgP7XMMrWAovwhO8I2gxkC8DibAFYnC0Ai6OFgjeL4Pmm0M2L0dzAzSJY2cDNy:E8ELJ5MdsLWJwtAIuzBWBxtgAszhaAxdkCsDi:AYnqZwd25SoPAAAAAElFTkSuQmCC"));
-		var DESC = hxd_res_Any.fromBytes("hxd/res/defaultFont.fnt",haxe_Unserializer.run("s14030:PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0idXRmLTgiPz4KPEZvbnQgc2l6ZT0iMTIiIGZhbWlseT0iUGl4ZWwgT3BlcmF0b3IiIGhlaWdodD0iMTYiIHN0eWxlPSJSZWd1bGFyIj4KIDxDaGFyIHdpZHRoPSI0IiBvZmZzZXQ9IjAgMTMiIHJlY3Q9IjEgMTIgMCAwIiBjb2RlPSIgIi8%CiA8Q2hhciB3aWR0aD0iMyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjIgMyAxIDkiIGNvZGU9IiEiLz4KIDxDaGFyIHdpZHRoPSI1IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNCAzIDMgMyIgY29kZT0iJnF1b3Q7Ii8%CiA8Q2hhciB3aWR0aD0iOCIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjggMyA2IDkiIGNvZGU9IiMiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMiIgcmVjdD0iMTUgMSA1IDEzIiBjb2RlPSIkIi8%CiA8Q2hhciB3aWR0aD0iOSIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjIxIDMgNyA5IiBjb2RlPSIlIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjI5IDMgNSA5IiBjb2RlPSImYW1wOyIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMSA0IiByZWN0PSIzNSAzIDEgMyIgY29kZT0iJyIvPgogPENoYXIgd2lkdGg9IjUiIG9mZnNldD0iMSA0IiByZWN0PSIzNyAzIDMgOSIgY29kZT0iKCIvPgogPENoYXIgd2lkdGg9IjUiIG9mZnNldD0iMSA0IiByZWN0PSI0MSAzIDMgOSIgY29kZT0iKSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI0NSAzIDUgNSIgY29kZT0iKiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSI1MSA1IDUgNSIgY29kZT0iKyIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMCAxMiIgcmVjdD0iNTcgMTEgMiAzIiBjb2RlPSIsIi8%CiA8Q2hhciB3aWR0aD0iNiIgb2Zmc2V0PSIxIDgiIHJlY3Q9IjYwIDcgNCAxIiBjb2RlPSItIi8%CiA8Q2hhciB3aWR0aD0iMyIgb2Zmc2V0PSIxIDEyIiByZWN0PSI2NSAxMSAxIDEiIGNvZGU9Ii4iLz4KIDxDaGFyIHdpZHRoPSI1IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNjcgMyAzIDkiIGNvZGU9Ii8iLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNzEgMyA1IDkiIGNvZGU9IjAiLz4KIDxDaGFyIHdpZHRoPSI1IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNzcgMyAzIDkiIGNvZGU9IjEiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iODEgMyA1IDkiIGNvZGU9IjIiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iODcgMyA1IDkiIGNvZGU9IjMiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iOTMgMyA1IDkiIGNvZGU9IjQiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iOTkgMyA1IDkiIGNvZGU9IjUiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMTA1IDMgNSA5IiBjb2RlPSI2Ii8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjExMSAzIDUgOSIgY29kZT0iNyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIxMTcgMyA1IDkiIGNvZGU9IjgiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMSAxNSA1IDkiIGNvZGU9IjkiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjEgNiIgcmVjdD0iNyAxNyAxIDciIGNvZGU9IjoiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjAgNiIgcmVjdD0iOSAxNyAyIDkiIGNvZGU9IjsiLz4KIDxDaGFyIHdpZHRoPSI1IiBvZmZzZXQ9IjEgNiIgcmVjdD0iMTIgMTcgMyA1IiBjb2RlPSImbHQ7Ii8%CiA8Q2hhciB3aWR0aD0iNiIgb2Zmc2V0PSIxIDciIHJlY3Q9IjE2IDE4IDQgMyIgY29kZT0iPSIvPgogPENoYXIgd2lkdGg9IjUiIG9mZnNldD0iMSA2IiByZWN0PSIyMSAxNyAzIDUiIGNvZGU9Ij4iLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMjUgMTUgNSA5IiBjb2RlPSI:Ii8%CiA8Q2hhciB3aWR0aD0iOSIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjMxIDE1IDcgOSIgY29kZT0iQCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIzOSAxNSA1IDkiIGNvZGU9IkEiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNDUgMTUgNSA5IiBjb2RlPSJCIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjUxIDE1IDUgOSIgY29kZT0iQyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI1NyAxNSA1IDkiIGNvZGU9IkQiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNjMgMTUgNSA5IiBjb2RlPSJFIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjY5IDE1IDUgOSIgY29kZT0iRiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI3NSAxNSA1IDkiIGNvZGU9IkciLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iODEgMTUgNSA5IiBjb2RlPSJIIi8%CiA8Q2hhciB3aWR0aD0iMyIgb2Zmc2V0PSIxIDQiIHJlY3Q9Ijg3IDE1IDEgOSIgY29kZT0iSSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI4OSAxNSA1IDkiIGNvZGU9IkoiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iOTUgMTUgNSA5IiBjb2RlPSJLIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjEwMSAxNSA1IDkiIGNvZGU9IkwiLz4KIDxDaGFyIHdpZHRoPSI5IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMTA3IDE1IDcgOSIgY29kZT0iTSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIxMTUgMTUgNSA5IiBjb2RlPSJOIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjEyMSAxNSA1IDkiIGNvZGU9Ik8iLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMSAyNyA1IDkiIGNvZGU9IlAiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNyAyNyA1IDkiIGNvZGU9IlEiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMTMgMjcgNSA5IiBjb2RlPSJSIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjE5IDI3IDUgOSIgY29kZT0iUyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIyNSAyNyA1IDkiIGNvZGU9IlQiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMzEgMjcgNSA5IiBjb2RlPSJVIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjM3IDI3IDUgOSIgY29kZT0iViIvPgogPENoYXIgd2lkdGg9IjkiIG9mZnNldD0iMSA0IiByZWN0PSI0MyAyNyA3IDkiIGNvZGU9IlciLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNTEgMjcgNSA5IiBjb2RlPSJYIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjU3IDI3IDUgOSIgY29kZT0iWSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI2MyAyNyA1IDkiIGNvZGU9IloiLz4KIDxDaGFyIHdpZHRoPSI1IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNjkgMjcgMyA5IiBjb2RlPSJbIi8%CiA8Q2hhciB3aWR0aD0iNSIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjczIDI3IDMgOSIgY29kZT0iXCIvPgogPENoYXIgd2lkdGg9IjUiIG9mZnNldD0iMSA0IiByZWN0PSI3NyAyNyAzIDkiIGNvZGU9Il0iLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iODEgMjcgNSAzIiBjb2RlPSJeIi8%CiA8Q2hhciB3aWR0aD0iNSIgb2Zmc2V0PSIwIDE0IiByZWN0PSI4NyAzNyA1IDEiIGNvZGU9Il8iLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjAgNCIgcmVjdD0iOTMgMjcgMiAyIiBjb2RlPSJgIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9Ijk2IDI5IDUgNyIgY29kZT0iYSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIxMDIgMjcgNSA5IiBjb2RlPSJiIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjEwOCAyOSA1IDciIGNvZGU9ImMiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMTE0IDI3IDUgOSIgY29kZT0iZCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSIxMjAgMjkgNSA3IiBjb2RlPSJlIi8%CiA8Q2hhciB3aWR0aD0iNiIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjEgMzkgNSA5IiBjb2RlPSJmIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjcgNDEgNSA5IiBjb2RlPSJnIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjEzIDM5IDUgOSIgY29kZT0iaCIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMSA0IiByZWN0PSIxOSAzOSAxIDkiIGNvZGU9ImkiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMjEgMzkgNSAxMSIgY29kZT0iaiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIyNyAzOSA1IDkiIGNvZGU9ImsiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjEgNCIgcmVjdD0iMzMgMzkgMSA5IiBjb2RlPSJsIi8%CiA8Q2hhciB3aWR0aD0iOSIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjM1IDQxIDcgNyIgY29kZT0ibSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSI0MyA0MSA1IDciIGNvZGU9Im4iLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNiIgcmVjdD0iNDkgNDEgNSA3IiBjb2RlPSJvIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjU1IDQxIDUgOSIgY29kZT0icCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSI2MSA0MSA1IDkiIGNvZGU9InEiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNiIgcmVjdD0iNjcgNDEgNSA3IiBjb2RlPSJyIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjczIDQxIDUgNyIgY29kZT0icyIvPgogPENoYXIgd2lkdGg9IjYiIG9mZnNldD0iMSA1IiByZWN0PSI3OSA0MCA1IDgiIGNvZGU9InQiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNiIgcmVjdD0iODUgNDEgNSA3IiBjb2RlPSJ1Ii8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjkxIDQxIDUgNyIgY29kZT0idiIvPgogPENoYXIgd2lkdGg9IjkiIG9mZnNldD0iMSA2IiByZWN0PSI5NyA0MSA3IDciIGNvZGU9InciLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNiIgcmVjdD0iMTA1IDQxIDUgNyIgY29kZT0ieCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSIxMTEgNDEgNSA5IiBjb2RlPSJ5Ii8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjExNyA0MSA1IDciIGNvZGU9InoiLz4KIDxDaGFyIHdpZHRoPSI2IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMSA1NCA0IDkiIGNvZGU9InsiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjEgNCIgcmVjdD0iNiA1NCAxIDkiIGNvZGU9InwiLz4KIDxDaGFyIHdpZHRoPSI2IiBvZmZzZXQ9IjEgNCIgcmVjdD0iOCA1NCA0IDkiIGNvZGU9In0iLz4KIDxDaGFyIHdpZHRoPSI4IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMTMgNTQgNiAyIiBjb2RlPSJ%Ii8%CiA8Q2hhciB3aWR0aD0iMyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjIwIDU2IDEgOSIgY29kZT0iwqEiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMjIgNTQgNSAxMSIgY29kZT0iwqIiLz4KIDxDaGFyIHdpZHRoPSI4IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMjggNTQgNiA5IiBjb2RlPSLCoyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIzNSA1NCA1IDkiIGNvZGU9IsKlIi8%CiA8Q2hhciB3aWR0aD0iMyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjQxIDU0IDEgOSIgY29kZT0iwqYiLz4KIDxDaGFyIHdpZHRoPSI1IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNDMgNTQgMyAxIiBjb2RlPSLCqCIvPgogPENoYXIgd2lkdGg9IjkiIG9mZnNldD0iMSA0IiByZWN0PSI0NyA1NCA3IDkiIGNvZGU9IsKpIi8%CiA8Q2hhciB3aWR0aD0iOCIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjU1IDU2IDYgNSIgY29kZT0iwqsiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgOCIgcmVjdD0iNjIgNTggNSAzIiBjb2RlPSLCrCIvPgogPENoYXIgd2lkdGg9IjYiIG9mZnNldD0iMSA0IiByZWN0PSI2OCA1NCA0IDQiIGNvZGU9IsKwIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjczIDU2IDUgNyIgY29kZT0iwrEiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjEgNCIgcmVjdD0iNzkgNTQgMiAyIiBjb2RlPSLCtCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSI4MiA1NiA1IDkiIGNvZGU9IsK1Ii8%CiA8Q2hhciB3aWR0aD0iOCIgb2Zmc2V0PSIxIDQiIHJlY3Q9Ijg4IDU0IDcgOSIgY29kZT0iwrYiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjEgOCIgcmVjdD0iOTYgNTggMSAxIiBjb2RlPSLCtyIvPgogPENoYXIgd2lkdGg9IjUiIG9mZnNldD0iMCAxMyIgcmVjdD0iOTggNjMgMyAyIiBjb2RlPSLCuCIvPgogPENoYXIgd2lkdGg9IjgiIG9mZnNldD0iMSA2IiByZWN0PSIxMDIgNTYgNiA1IiBjb2RlPSLCuyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSIxMDkgNTYgNSA5IiBjb2RlPSLCvyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAxIiByZWN0PSIxMTUgNTEgNSAxMiIgY29kZT0iw4AiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMSIgcmVjdD0iMTIxIDUxIDUgMTIiIGNvZGU9IsOBIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9IjEgNjcgNSAxMiIgY29kZT0iw4IiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMSIgcmVjdD0iNyA2NyA2IDEyIiBjb2RlPSLDgyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAyIiByZWN0PSIxNCA2OCA1IDExIiBjb2RlPSLDhCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAwIiByZWN0PSIyMCA2NiA1IDEzIiBjb2RlPSLDhSIvPgogPENoYXIgd2lkdGg9IjExIiBvZmZzZXQ9IjEgNCIgcmVjdD0iMjYgNzAgOSA5IiBjb2RlPSLDhiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIzNiA3MCA1IDExIiBjb2RlPSLDhyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAxIiByZWN0PSI0MiA2NyA1IDEyIiBjb2RlPSLDiCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAxIiByZWN0PSI0OCA2NyA1IDEyIiBjb2RlPSLDiSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAxIiByZWN0PSI1NCA2NyA1IDEyIiBjb2RlPSLDiiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAyIiByZWN0PSI2MCA2OCA1IDExIiBjb2RlPSLDiyIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMCAxIiByZWN0PSI2NiA2NyAyIDEyIiBjb2RlPSLDjCIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMSAxIiByZWN0PSI2OSA2NyAyIDEyIiBjb2RlPSLDjSIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMCAxIiByZWN0PSI3MiA2NyAzIDEyIiBjb2RlPSLDjiIvPgogPENoYXIgd2lkdGg9IjMiIG9mZnNldD0iMCAyIiByZWN0PSI3NiA2OCAzIDExIiBjb2RlPSLDjyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMCA0IiByZWN0PSI4MCA3MCA2IDkiIGNvZGU9IsOQIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9Ijg3IDY3IDYgMTIiIGNvZGU9IsORIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9Ijk0IDY3IDUgMTIiIGNvZGU9IsOSIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9IjEwMCA2NyA1IDEyIiBjb2RlPSLDkyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAxIiByZWN0PSIxMDYgNjcgNSAxMiIgY29kZT0iw5QiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMSIgcmVjdD0iMTEyIDY3IDYgMTIiIGNvZGU9IsOVIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDIiIHJlY3Q9IjExOSA2OCA1IDExIiBjb2RlPSLDliIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA2IiByZWN0PSIxIDg3IDUgNSIgY29kZT0iw5ciLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjAgNCIgcmVjdD0iNyA4NSA3IDkiIGNvZGU9IsOYIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9IjE1IDgyIDUgMTIiIGNvZGU9IsOZIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9IjIxIDgyIDUgMTIiIGNvZGU9IsOaIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9IjI3IDgyIDUgMTIiIGNvZGU9IsObIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDIiIHJlY3Q9IjMzIDgzIDUgMTEiIGNvZGU9IsOcIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDEiIHJlY3Q9IjM5IDgyIDUgMTIiIGNvZGU9IsOdIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjQ1IDg1IDUgOSIgY29kZT0iw54iLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iNTEgODUgNSA5IiBjb2RlPSLDnyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAzIiByZWN0PSI1NyA4NCA1IDEwIiBjb2RlPSLDoCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAzIiByZWN0PSI2MyA4NCA1IDEwIiBjb2RlPSLDoSIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAzIiByZWN0PSI2OSA4NCA1IDEwIiBjb2RlPSLDoiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAzIiByZWN0PSI3NSA4NCA2IDEwIiBjb2RlPSLDoyIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI4MiA4NSA1IDkiIGNvZGU9IsOkIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDIiIHJlY3Q9Ijg4IDgzIDUgMTEiIGNvZGU9IsOlIi8%CiA8Q2hhciB3aWR0aD0iMTEiIG9mZnNldD0iMSA2IiByZWN0PSI5NCA4NyA5IDciIGNvZGU9IsOmIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDYiIHJlY3Q9IjEwNCA4NyA1IDkiIGNvZGU9IsOnIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDMiIHJlY3Q9IjExMCA4NCA1IDEwIiBjb2RlPSLDqCIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSAzIiByZWN0PSIxMTYgODQgNSAxMCIgY29kZT0iw6kiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMyIgcmVjdD0iMSA5NyA1IDEwIiBjb2RlPSLDqiIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSI3IDk4IDUgOSIgY29kZT0iw6siLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjAgMyIgcmVjdD0iMTMgOTcgMiAxMCIgY29kZT0iw6wiLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjEgMyIgcmVjdD0iMTYgOTcgMiAxMCIgY29kZT0iw60iLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjAgMyIgcmVjdD0iMTkgOTcgMyAxMCIgY29kZT0iw64iLz4KIDxDaGFyIHdpZHRoPSIzIiBvZmZzZXQ9IjAgNCIgcmVjdD0iMjMgOTggMyA5IiBjb2RlPSLDryIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIyNyA5OCA2IDkiIGNvZGU9IsOwIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDMiIHJlY3Q9IjM0IDk3IDYgMTAiIGNvZGU9IsOxIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDMiIHJlY3Q9IjQxIDk3IDUgMTAiIGNvZGU9IsOyIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDMiIHJlY3Q9IjQ3IDk3IDUgMTAiIGNvZGU9IsOzIi8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDMiIHJlY3Q9IjUzIDk3IDUgMTAiIGNvZGU9IsO0Ii8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDMiIHJlY3Q9IjU5IDk3IDYgMTAiIGNvZGU9IsO1Ii8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjY2IDk4IDUgOSIgY29kZT0iw7YiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNiIgcmVjdD0iNzIgMTAwIDUgNSIgY29kZT0iw7ciLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjAgNiIgcmVjdD0iNzggMTAwIDcgNyIgY29kZT0iw7giLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMyIgcmVjdD0iODYgOTcgNSAxMCIgY29kZT0iw7kiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMyIgcmVjdD0iOTIgOTcgNSAxMCIgY29kZT0iw7oiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMyIgcmVjdD0iOTggOTcgNSAxMCIgY29kZT0iw7siLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgNCIgcmVjdD0iMTA0IDk4IDUgOSIgY29kZT0iw7wiLz4KIDxDaGFyIHdpZHRoPSI3IiBvZmZzZXQ9IjEgMyIgcmVjdD0iMTEwIDk3IDUgMTIiIGNvZGU9IsO9Ii8%CiA8Q2hhciB3aWR0aD0iNyIgb2Zmc2V0PSIxIDQiIHJlY3Q9IjExNiA5OCA1IDExIiBjb2RlPSLDviIvPgogPENoYXIgd2lkdGg9IjciIG9mZnNldD0iMSA0IiByZWN0PSIxIDExMCA1IDExIiBjb2RlPSLDvyIvPgo8L0ZvbnQ%Cg"));
-		var bmp = new hxd_res_BitmapFont(DESC.entry);
-		bmp.loader = BYTES.loader;
-		fnt = bmp.toFont();
-		engine.resCache.set(hxd_res_DefaultFont,fnt);
-	}
-	return fnt;
-};
-var hxd_res_Embed = function() { };
-$hxClasses["hxd.res.Embed"] = hxd_res_Embed;
-hxd_res_Embed.__name__ = "hxd.res.Embed";
 var hxd_res_ImageFormat = {};
 hxd_res_ImageFormat.get_useAsyncDecode = function(this1) {
 	return this1 == 0;
@@ -63463,33 +62000,8 @@ var Enum = { };
 haxe_Resource.content = [];
 haxe_ds_ObjectMap.count = 0;
 haxe_MainLoop.add(hxd_System.updateCursor,-1);
-var hx__registerFont;
-hx__registerFont = function(name,data) {
-	var s = window.document.createElement("style");
-	s.type = "text/css";
-	s.innerHTML = "@font-face{ font-family: " + name + "; src: url('data:font/ttf;base64," + data + "') format('truetype'); }";
-	window.document.getElementsByTagName("head")[0].appendChild(s);
-	var div = window.document.createElement("div");
-	div.style.fontFamily = name;
-	div.style.opacity = 0;
-	div.style.width = "1px";
-	div.style.height = "1px";
-	div.style.position = "fixed";
-	div.style.bottom = "0px";
-	div.style.right = "0px";
-	div.innerHTML = ".";
-	div.className = "hx__loadFont";
-	window.document.body.appendChild(div);
-};
 js_Boot.__toStr = ({ }).toString;
 Constants.Palette = { Purple : 6173019, PinkRed : 11546716, Dark : 2565942, LightBlue : 6750179, Blue : 5089023};
-Xml.Element = 0;
-Xml.PCData = 1;
-Xml.CData = 2;
-Xml.Comment = 3;
-Xml.DocType = 4;
-Xml.ProcessingInstruction = 5;
-Xml.Document = 6;
 format_gif_Tools.LN2 = Math.log(2);
 format_mp3_MPEG.V1 = 3;
 format_mp3_MPEG.V2 = 2;
@@ -63703,17 +62215,6 @@ haxe_Unserializer.BASE64 = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz
 haxe_crypto_Base64.CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 haxe_crypto_Base64.BYTES = haxe_io_Bytes.ofString(haxe_crypto_Base64.CHARS);
 haxe_io_FPHelper.helper = new DataView(new ArrayBuffer(8));
-haxe_xml_Parser.escapes = (function($this) {
-	var $r;
-	var h = new haxe_ds_StringMap();
-	h.h["lt"] = "<";
-	h.h["gt"] = ">";
-	h.h["amp"] = "&";
-	h.h["quot"] = "\"";
-	h.h["apos"] = "'";
-	$r = h;
-	return $r;
-}(this));
 haxe_zip_InflateImpl.LEN_EXTRA_BITS_TBL = [0,0,0,0,0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,0,-1,-1];
 haxe_zip_InflateImpl.LEN_BASE_VAL_TBL = [3,4,5,6,7,8,9,10,11,13,15,17,19,23,27,31,35,43,51,59,67,83,99,115,131,163,195,227,258];
 haxe_zip_InflateImpl.DIST_EXTRA_BITS_TBL = [0,0,0,0,1,1,2,2,3,3,4,4,5,5,6,6,7,7,8,8,9,9,10,10,11,11,12,12,13,13,-1,-1];
