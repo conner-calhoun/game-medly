@@ -11,7 +11,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 
 
 set(SRCS
-    src/jinx/src/renderer.cc)
+    src/jinx/src/renderer.cpp)
 
 set(DEP_SRCS
     deps/glad/src/glad.c)
@@ -34,7 +34,7 @@ target_link_libraries(${PROJECT_NAME}
 
 # Test
 set(TEST_SRCS
-    src/test/main.cc)
+    src/test/main.cpp)
 
 add_executable(test_${PROJECT_NAME} ${TEST_SRCS})
 

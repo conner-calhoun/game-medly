@@ -4,32 +4,28 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-
 #include <renderer.h>
 
 namespace jinx {
 
 class Window {
-  public:
+   public:
     Window() {}
 
     void SetTitle(std::string t) { _title = t; }
 
     void EngineUpdate() {
-        // Test triangle code
-        Triangle t{{-0.9f, -0.5f}, {0.0f, -0.5f}, {-0.45f, 0.5f}};
-        Renderer::GetInstance()->RenderTriangle(t);
+        // Trying to render a rectangle at (10, 10) with a width & height of 10
 
-        Triangle t2{{0.0f, -0.5f}, {0.9f, -0.5f}, {0.45f, 0.5f}};
-        Renderer::GetInstance()->RenderTriangle(t2);
+        Rect r{100.0f, 100.0f, 100.0f, 100.0f};
+        r.Render();
     }
 
     void Start() {
         GLFWwindow* window;
 
         /* Initialize the library */
-        if (!glfwInit())
-            return;
+        if (!glfwInit()) return;
 
         // Create a windowed mode window and its OpenGL context
         // I don't like how I set the title, pass in the config item, but keep
@@ -55,8 +51,6 @@ class Window {
             return;
         }
 
-        Renderer::GetInstance()->SetupVAO();
-
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
             /* Render here */
@@ -75,9 +69,9 @@ class Window {
         glfwTerminate();
     }
 
-  private:
+   private:
     std::string _title;
 };
-} // namespace jinx
+}  // namespace jinx
 
-#endif // JINX_WINDOW_H
+#endif  // JINX_WINDOW_H
