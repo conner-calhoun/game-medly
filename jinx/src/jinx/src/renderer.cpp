@@ -31,6 +31,7 @@ std::vector<float> Triangle::ToVertices() {
 Rect::Rect(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
 
 void Rect::Render() {
+    // TODO: Move to init
     float vertices[] = {
         0.5f,  0.5f,  0.0f,  // top right
         0.5f,  -0.5f, 0.0f,  // bottom right
@@ -62,6 +63,9 @@ void Rect::Render() {
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    // End init section
+
+    // Render Loop
     glBindVertexArray(VAO);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
