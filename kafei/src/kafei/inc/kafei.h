@@ -1,30 +1,30 @@
-#ifndef JINX_H
-#define JINX_H
+#ifndef KAFEI_H
+#define KAFEI_H
 
 #include "string"
 #include "window.h"
 
-namespace jinx {
+namespace kafei {
 
 class Config {
-  public:
+   public:
     Config() {}
     void SetTitle(std::string title) { _mainTitle = title; }
     std::string GetTitle() { return _mainTitle; }
 
-  private:
+   private:
     std::string _mainTitle;
 };
 
-class Jinx {
-  public:
-    Jinx(Config& cfg) {
+class Kafei {
+   public:
+    Kafei(Config& cfg) {
         // create a window
         Window win{};
         win.SetTitle(cfg.GetTitle());
         win.Start();
     };
 };
-} // namespace jinx
+}  // namespace kafei
 
-#endif // JINX_H
+#endif  // KAFEI_H

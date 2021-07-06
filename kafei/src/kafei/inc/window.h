@@ -1,12 +1,12 @@
-#ifndef JINX_WINDOW_H
-#define JINX_WINDOW_H
+#ifndef KAFEI_WINDOW_H
+#define KAFEI_WINDOW_H
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <renderer.h>
 
-namespace jinx {
+namespace kafei {
 
 class Window {
    public:
@@ -72,6 +72,6 @@ class Window {
    private:
     std::string _title;
 };
-}  // namespace jinx
+}  // namespace kafei
 
-#endif  // JINX_WINDOW_H
+#endif  // KAFEI_WINDOW_H

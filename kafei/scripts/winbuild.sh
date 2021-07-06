@@ -9,4 +9,4 @@ fi
 
 cd build
 cmake ..
-MSBuild.exe Jinx.sln
+MSBuild.exe kafei.sln

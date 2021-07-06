@@ -1,4 +1,4 @@
-# Jinx
+# kafei
 OpenGL Game Programming
 
 

@@ -1,6 +1,6 @@
 #include <renderer.h>
 
-using namespace jinx;
+namespace kafei {
 
 /// Shader stuff
 const char* VERT_SRC =
@@ -163,3 +163,5 @@ bool Renderer::CheckShaderLinking(unsigned int shaderProgram) {
 
     return success;
 }
+
+}  // namespace kafei

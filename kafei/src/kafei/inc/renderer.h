@@ -1,5 +1,5 @@
-#ifndef JINX_RENDERER_H
-#define JINX_RENDERER_H
+#ifndef KAFEI_RENDERER_H
+#define KAFEI_RENDERER_H
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
@@ -15,7 +15,7 @@
  * right now this code is in window.h
  */
 
-namespace jinx {
+namespace kafei {
 
 struct Point {
     float x;
@@ -67,6 +67,6 @@ class Renderer {
     static std::unique_ptr<Renderer> _instance;
 };
 
-}  // namespace jinx
+}  // namespace kafei
 
-#endif  // JINX_RENDERER_H
+#endif  // KAFEI_RENDERER_H
