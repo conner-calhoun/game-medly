@@ -35,11 +35,9 @@ struct Triangle {
 };
 
 struct Rect {
-    Triangle l;
-    Triangle r;
+    float x, y, w, h;
 
     Rect(float x, float y, float w, float h);
-
     void Render();
 };
 
@@ -55,9 +53,6 @@ class Renderer {
     void RenderTriangle(Triangle& t);
 
     std::pair<int, int> GetWindowSize();
-
-    // TODO: one VAO isn't correct, each "batch" should have a VAO, work on this
-    void SetupVAO();
 
     bool SetupShaders();
 
