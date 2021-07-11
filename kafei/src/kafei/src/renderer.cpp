@@ -1,4 +1,4 @@
-#include <renderer.h>
+#include <Renderer.h>
 
 namespace kafei {
 
@@ -31,7 +31,7 @@ std::vector<float> Tri::ToVertices() {
 void Tri::Render() {
     std::vector<float> vertices = ToVertices();
 
-    unsigned int VBO;
+    uint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);

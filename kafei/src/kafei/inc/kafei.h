@@ -1,15 +1,15 @@
 #ifndef KAFEI_H
 #define KAFEI_H
 
+#include "Window.h"
 #include "string"
-#include "window.h"
 
 namespace kafei {
 
 class Config {
    public:
     Config() {}
-    void SetTitle(std::string title) { _mainTitle = title; }
+    void SetWindowTitle(std::string title) { _mainTitle = title; }
     std::string GetTitle() { return _mainTitle; }
 
    private:

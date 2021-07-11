@@ -1,11 +1,11 @@
 #include <iostream>
 
-#include "kafei.h"
+#include "Kafei.h"
 
 // Engine Testing Code
 int main(void) {
     kafei::Config cfg{};
-    cfg.SetTitle("kafei");
+    cfg.SetWindowTitle("Kafei");
 
     kafei::Kafei game{cfg};
 }

@@ -11,7 +11,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 
 
 set(SRCS
-    src/kafei/src/renderer.cpp)
+    src/kafei/src/Renderer.cpp)
 
 set(DEP_SRCS
     deps/glad/src/glad.c)
