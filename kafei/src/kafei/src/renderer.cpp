@@ -2,7 +2,7 @@
 
 namespace kafei {
 
-/// Shader stuff
+/// Basic Shaders
 const char* VERT_SRC =
     "#version 400\n"
     "layout (location = 0) in vec3 aPos;\n"
@@ -17,48 +17,66 @@ const char* FRAG_SRC =
     "   frag_colour = vec4(0.5, 0.0, 0.5, 1.0);\n"
     "}";
 
-Triangle::Triangle(Point left, Point right, Point top) {
-    this->left = left;
-    this->right = right;
-    this->top = top;
+Tri::Tri(Vec2 left, Vec2 right, Vec2 top) : left(left), right(right), top(top) {}
+
+std::vector<float> Tri::ToVertices() {
+    // TODO: convert pixel coords to OpenGL coords
+    return {
+        left.x,  left.y,  0.0f,  // Left Point
+        right.x, right.y, 0.0f,  // Right Point
+        top.x,   top.y,   0.0f   // Top Point
+    };
 }
 
-std::vector<float> Triangle::ToVertices() {
-    // TODO: Do some math to convert the pixel coords to the OpenGL Vertices
-    return {left.x, left.y, 0.0f, right.x, right.y, 0.0f, top.x, top.y, 0.0f};
+void Tri::Render() {
+    std::vector<float> vertices = ToVertices();
+
+    unsigned int VBO;
+    glGenBuffers(1, &VBO);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
+
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+    glEnableVertexAttribArray(0);
+
+    // draw the triangle
+    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
-Rect::Rect(float x, float y, float w, float h) : x(x), y(y), w(w), h(h) {}
+Rect::Rect(Vec2 pos, Vec2 size) : pos(pos), size(size) {}
 
-void Rect::Render() {
-    // TODO: Move to init
-    float vertices[] = {
+std::vector<float> Rect::ToVertices() {
+    // TODO: convert pixel coords to OpenGL coords
+    return {
         0.5f,  0.5f,  0.0f,  // top right
         0.5f,  -0.5f, 0.0f,  // bottom right
         -0.5f, -0.5f, 0.0f,  // bottom left
         -0.5f, 0.5f,  0.0f   // top left
     };
-    unsigned int indices[] = {
-        // note that we start from 0!
-        0, 1, 3,  // first triangle
-        1, 2, 3   // second triangle
-    };
+}
 
+void Rect::Render() {
+    // TODO: Move to init
+    std::vector<float> vertices = ToVertices();
+
+    // Vertex array object
     unsigned int VAO;
     glGenBuffers(1, &VAO);
     glBindVertexArray(VAO);
 
+    // Vertex buffer object
     unsigned int VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
 
+    // Element buffer object
     unsigned int EBO;
     glGenBuffers(1, &EBO);
-
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
+    // Interpret vertex data
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
 
@@ -79,22 +97,6 @@ std::unique_ptr<Renderer>& Renderer::GetInstance() {
     }
 
     return _instance;
-}
-
-void Renderer::RenderTriangle(Triangle& t) {
-    // get vertices from triangle
-    std::vector<float> vertices = t.ToVertices();
-
-    unsigned int VBO;
-    glGenBuffers(1, &VBO);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
-
-    // draw the triangle
-    glDrawArrays(GL_TRIANGLES, 0, 3);
 }
 
 std::pair<int, int> Renderer::GetWindowSize() {

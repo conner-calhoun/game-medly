@@ -17,27 +17,31 @@
 
 namespace kafei {
 
-struct Point {
-    float x;
-    float y;
+struct Vec2 {
+    float x, y;
 };
 
-struct Triangle {
-    Point left;
-    Point right;
-    Point top;
+struct Tri {
+    Vec2 left;
+    Vec2 right;
+    Vec2 top;
 
-    Triangle() {}
-
-    Triangle(Point left, Point right, Point top);
-
+    Tri() {}
+    Tri(Vec2 left, Vec2 right, Vec2 top);
     std::vector<float> ToVertices();
+    void Render();
 };
 
 struct Rect {
-    float x, y, w, h;
+    Vec2 pos, size;
+    unsigned int indices[6] = {
+        // note that we start from 0!
+        0, 1, 3,  // first triangle
+        1, 2, 3   // second triangle
+    };
 
-    Rect(float x, float y, float w, float h);
+    Rect(Vec2 pos, Vec2 size);
+    std::vector<float> ToVertices();
     void Render();
 };
 
@@ -49,8 +53,6 @@ class Renderer {
     static std::unique_ptr<Renderer>& GetInstance();
 
     ~Renderer() = default;
-
-    void RenderTriangle(Triangle& t);
 
     std::pair<int, int> GetWindowSize();
 

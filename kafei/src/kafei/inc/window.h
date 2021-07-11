@@ -17,7 +17,7 @@ class Window {
     void EngineUpdate() {
         // Trying to render a rectangle at (10, 10) with a width & height of 10
 
-        Rect r{100.0f, 100.0f, 100.0f, 100.0f};
+        Rect r{{100.0f, 100.0f}, {100.0f, 100.0f}};
         r.Render();
     }
 
