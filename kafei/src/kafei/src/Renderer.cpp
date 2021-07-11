@@ -1,4 +1,5 @@
 #include <Renderer.h>
+#include <Typedefs.h>
 
 namespace kafei {
 
@@ -60,18 +61,18 @@ void Rect::Render() {
     std::vector<float> vertices = ToVertices();
 
     // Vertex array object
-    unsigned int VAO;
+    uint VAO;
     glGenBuffers(1, &VAO);
     glBindVertexArray(VAO);
 
     // Vertex buffer object
-    unsigned int VBO;
+    uint VBO;
     glGenBuffers(1, &VBO);
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
 
     // Element buffer object
-    unsigned int EBO;
+    uint EBO;
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
@@ -110,7 +111,7 @@ bool Renderer::SetupShaders() {
     bool success = true;
 
     // compile vert shader
-    unsigned int vertex_shader;
+    uint vertex_shader;
     vertex_shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vertex_shader, 1, &VERT_SRC, NULL);
     glCompileShader(vertex_shader);
@@ -118,14 +119,14 @@ bool Renderer::SetupShaders() {
     // check shader compilation
     success &= CheckShaderCompilation(vertex_shader);
 
-    unsigned int fragment_shader;
+    uint fragment_shader;
     fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fragment_shader, 1, &FRAG_SRC, NULL);
     glCompileShader(fragment_shader);
 
     success &= CheckShaderCompilation(fragment_shader);
 
-    unsigned int shader_program;
+    uint shader_program;
     shader_program = glCreateProgram();
 
     glAttachShader(shader_program, vertex_shader);
