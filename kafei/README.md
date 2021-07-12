@@ -4,15 +4,13 @@ OpenGL Game Programming
 
 ### Dependencies
 
+**Note:** These are for building on Windows 10 using Visual Studio 2019 (MSBuild)
+
 - DearImgui: `https://github.com/ocornut/imgui.git`
 - GLFW: `https://github.com/glfw/glfw.git`
-- GLAD: `https://glad.dav1d.de/` **NOTE:** Must download and unzip into the `deps` folder
+- GLAD: `https://glad.dav1d.de/`
 
-Clone each of the above into the root of this project in a folder called `deps`
-
-**OR**
-
-1. `scripts/getdeps.sh`
+Located in `deps`
 
 
 ### Building
