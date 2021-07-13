@@ -4,8 +4,19 @@
 
 // Engine Testing Code
 int main(void) {
-    kafei::Config cfg{};
-    cfg.SetWindowTitle("Kafei");
+    kafei::Kafei kaf;
 
-    kafei::Kafei game{cfg};
+    kaf.Load(kaf.BuildConfig("Kafei"));
+
+    /**
+     * THe idea is to be able to make calls like:
+     *
+     * kaf.Load(kaf.Build("WorldName", World object))
+     *    .Load(kaf.Build(System object))
+     *    .Load(kaf.Build(DataContainer object));
+     *
+     * kaf.SetDefaultWorld("WorldName");
+     */
+
+    kaf.Start();
 }
