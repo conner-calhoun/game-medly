@@ -24,6 +24,12 @@ PUBLIC
 
     # GLAD Includes
     deps/glad/include
+
+    # STB
+    deps/stb/
+
+    # GLM
+    deps/
 )
 
 target_link_libraries(${PROJECT_NAME}
