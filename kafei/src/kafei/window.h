@@ -5,6 +5,7 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <renderer.h>
+#include <shader.h>
 
 namespace kafei {
 
@@ -47,14 +48,15 @@ class Window {
             return;
         }
 
-        // register shaders, not sure how to change shaders later tho..
-        if (!Renderer::GetInstance()->SetupShaders()) {
-            std::cout << "shaders not set up correctly" << std::endl;
-            return;
-        }
+        // Create the default shader
+        // TODO: Use a resource manager class to handle paths, possibly with an ENV_VAR
+        // KAFEI_RESOURCE_PATH or something like that.
+        Shader def_shader{"res/shaders/default.vert", "res/shaders/default.frag"};
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
+            def_shader.use();
+
             /* Render here */
             glClear(GL_COLOR_BUFFER_BIT);
 

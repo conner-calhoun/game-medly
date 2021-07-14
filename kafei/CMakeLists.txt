@@ -9,6 +9,8 @@ set(GLFW_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(GLFW_BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
 add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 
+# Copy resources to build dir
+file(COPY ${CMAKE_CURRENT_LIST_DIR}/src/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 
 set(SRCS
     src/kafei/Renderer.cpp)

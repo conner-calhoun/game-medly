@@ -27,7 +27,7 @@ class Shader {
             // open files
             vert_file.open(vert_path.c_str());
             frag_file.open(frag_path.c_str());
-            std::stringstream vShaderStream, fShaderStream;
+            std::stringstream vert_stream, frag_stream;
             // read file's buffer contents into streams
             vert_stream << vert_file.rdbuf();
             frag_stream << frag_file.rdbuf();
@@ -50,15 +50,15 @@ class Shader {
     }
 
     void set_bool(const std::string& name, bool val) const {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)val);
     }
 
     void set_int(const std::string& name, int val) const {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), val);
     }
 
     void set_float(const std::string& name, float val) const {
-        glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+        glUniform1f(glGetUniformLocation(ID, name.c_str()), val);
     }
 
    private:

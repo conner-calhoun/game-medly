@@ -3,21 +3,6 @@
 
 namespace kafei {
 
-/// Basic Shaders
-const char* VERT_SRC =
-    "#version 400\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main() {"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}";
-
-const char* FRAG_SRC =
-    "#version 400\n"
-    "out vec4 frag_colour;\n"
-    "void main() {"
-    "   frag_colour = vec4(0.5, 0.0, 0.5, 1.0);\n"
-    "}";
-
 Tri::Tri(Vec2 left, Vec2 right, Vec2 top) : left(left), right(right), top(top) {}
 
 std::vector<float> Tri::ToVertices() {
@@ -105,66 +90,6 @@ std::pair<int, int> Renderer::GetWindowSize() {
     int width, height;
     glfwGetWindowSize(window, &width, &height);
     return std::make_pair(width, height);
-}
-
-bool Renderer::SetupShaders() {
-    bool success = true;
-
-    // compile vert shader
-    uint vertex_shader;
-    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex_shader, 1, &VERT_SRC, NULL);
-    glCompileShader(vertex_shader);
-
-    // check shader compilation
-    success &= CheckShaderCompilation(vertex_shader);
-
-    uint fragment_shader;
-    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment_shader, 1, &FRAG_SRC, NULL);
-    glCompileShader(fragment_shader);
-
-    success &= CheckShaderCompilation(fragment_shader);
-
-    uint shader_program;
-    shader_program = glCreateProgram();
-
-    glAttachShader(shader_program, vertex_shader);
-    glAttachShader(shader_program, fragment_shader);
-    glLinkProgram(shader_program);
-
-    success &= CheckShaderLinking(shader_program);
-    glUseProgram(shader_program);
-
-    glDeleteShader(vertex_shader);
-    glDeleteShader(fragment_shader);
-
-    return success;
-}
-
-bool Renderer::CheckShaderCompilation(unsigned int shader) {
-    int success;
-    char info_log[512];
-
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, NULL, info_log);
-        std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << info_log << std::endl;
-    }
-
-    return success;
-}
-
-bool Renderer::CheckShaderLinking(unsigned int shaderProgram) {
-    int success;
-    char info_log[512];
-
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, info_log);
-    }
-
-    return success;
 }
 
 }  // namespace kafei
