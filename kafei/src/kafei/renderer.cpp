@@ -1,5 +1,5 @@
-#include <Renderer.h>
-#include <Typedefs.h>
+#include <renderer.h>
+#include <typedefs.h>
 
 namespace kafei {
 

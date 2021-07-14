@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "Kafei.h"
+#include "kafei.h"
 
 // Engine Testing Code
 int main(void) {

@@ -1,9 +1,9 @@
 #ifndef KAFEI_H
 #define KAFEI_H
 
-#include "Config.h"
-#include "Window.h"
+#include "config.h"
 #include "string"
+#include "window.h"
 
 /**
  * My idea for this is that the Kafei class is a builder that can build most things,

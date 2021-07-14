@@ -3,8 +3,8 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <Renderer.h>
 #include <glad/glad.h>
+#include <renderer.h>
 
 namespace kafei {
 
@@ -12,7 +12,9 @@ class Window {
    public:
     Window() {}
 
-    void SetTitle(std::string t) { _title = t; }
+    void SetTitle(std::string t) {
+        _title = t;
+    }
 
     void EngineUpdate() {
         // Trying to render a rectangle at (10, 10) with a width & height of 10
