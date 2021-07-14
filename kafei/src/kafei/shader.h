@@ -45,13 +45,21 @@ class Shader {
         compile_shaders(vert_code.c_str(), frag_code.c_str());
     }
 
-    void use() {}
+    void use() {
+        glUseProgram(ID);
+    }
 
-    void set_bool(const std::string& name, bool val) const {}
+    void set_bool(const std::string& name, bool val) const {
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)value);
+    }
 
-    void set_int(const std::string& name, int val) const {}
+    void set_int(const std::string& name, int val) const {
+        glUniform1i(glGetUniformLocation(ID, name.c_str()), value);
+    }
 
-    void set_float(const std::string& name, float val) const {}
+    void set_float(const std::string& name, float val) const {
+        glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
+    }
 
    private:
     bool compile_shaders(const char* vert_code, const char* frag_code) {
@@ -73,15 +81,13 @@ class Shader {
 
         success &= check_compilation(fragment_shader);
 
-        uint shader_program;
-        shader_program = glCreateProgram();
+        ID = glCreateProgram();
 
-        glAttachShader(shader_program, vertex_shader);
-        glAttachShader(shader_program, fragment_shader);
-        glLinkProgram(shader_program);
+        glAttachShader(ID, vertex_shader);
+        glAttachShader(ID, fragment_shader);
+        glLinkProgram(ID);
 
-        success &= check_linking(shader_program);
-        glUseProgram(shader_program);
+        success &= check_linking();
 
         glDeleteShader(vertex_shader);
         glDeleteShader(fragment_shader);
@@ -102,13 +108,13 @@ class Shader {
         return success;
     }
 
-    bool check_linking(uint shader_program) {
+    bool check_linking() {
         int success;
         char info_log[512];
 
-        glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
+        glGetProgramiv(ID, GL_LINK_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(shader_program, 512, NULL, info_log);
+            glGetProgramInfoLog(ID, 512, NULL, info_log);
         }
 
         return success;
