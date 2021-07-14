@@ -11,7 +11,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 
 
 set(SRCS
-    src/kafei/src/Renderer.cpp)
+    src/kafei/Renderer.cpp)
 
 set(DEP_SRCS
     deps/glad/src/glad.c)
@@ -20,7 +20,7 @@ add_library(${PROJECT_NAME} ${SRCS} ${DEP_SRCS})
 
 target_include_directories(${PROJECT_NAME}
 PUBLIC
-    src/kafei/inc
+    src/kafei
 
     # GLAD Includes
     deps/glad/include
@@ -47,7 +47,7 @@ add_executable(test_${PROJECT_NAME} ${TEST_SRCS})
 target_include_directories(test_${PROJECT_NAME}
 PUBLIC
     src/test
-    src/kafei/inc
+    src/kafei
 )
 
 target_link_libraries(test_${PROJECT_NAME}
