@@ -6,15 +6,15 @@ namespace kafei {
 class Config {
    public:
     Config() {}
-    void SetWindowTitle(std::string title) {
-        _mainTitle = title;
+    void set_window_title(std::string title) {
+        main_title = title;
     }
-    std::string GetTitle() {
-        return _mainTitle;
+    std::string get_title() {
+        return main_title;
     }
 
    private:
-    std::string _mainTitle;
+    std::string main_title;
 };
 
 }  // namespace kafei

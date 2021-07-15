@@ -6,17 +6,17 @@
 int main(void) {
     kafei::Kafei kaf;
 
-    kaf.Load(kaf.BuildConfig("Kafei"));
+    kaf.load(kaf.build_config("Kafei"));
 
     /**
      * THe idea is to be able to make calls like:
      *
-     * kaf.Load(kaf.Build("WorldName", World object))
-     *    .Load(kaf.Build(System object))
-     *    .Load(kaf.Build(DataContainer object));
+     * kaf.load(kaf.build("WorldName", World object))
+     *    .load(kaf.build(System object))
+     *    .load(kaf.build(DataContainer object));
      *
      * kaf.SetDefaultWorld("WorldName");
      */
 
-    kaf.Start();
+    kaf.start();
 }

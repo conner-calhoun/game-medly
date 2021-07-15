@@ -14,30 +14,30 @@ namespace kafei {
 
 class Kafei {
    public:
-    Kafei() : _win(), _cfg(){};
+    Kafei() : win(), cfg(){};
 
-    void Load(Config& cfg) {
-        _cfg = cfg;
+    void load(Config& cfg) {
+        this->cfg = cfg;
     }
 
-    void Start() {
-        LoadConfig();
-        _win.Start();
+    void start() {
+        load_config();
+        win.Start();
     }
 
-    Config BuildConfig(const std::string& windowTitle) {
+    Config build_config(const std::string& window_title) {
         Config cfg;
-        cfg.SetWindowTitle(windowTitle);
+        cfg.set_window_title(window_title);
         return cfg;
     }
 
    private:
-    void LoadConfig() {
-        _win.SetTitle(_cfg.GetTitle());
+    void load_config() {
+        win.SetTitle(cfg.get_title());
     }
 
-    Window _win;
-    Config _cfg;
+    Window win;
+    Config cfg;
 };
 }  // namespace kafei
 
