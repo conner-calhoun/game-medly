@@ -4,27 +4,49 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
-#include <renderer.h>
+#include <render.h>
 #include <shader.h>
 
 namespace kafei {
 
-class Window {
+/// TODO: Have the Kafei class build a world and add entities to the world
+class World {
    public:
-    Window() {}
+    World() : r({100.0f, 100.0f}, {100.0f, 100.0f}) {}
 
-    void SetTitle(std::string t) {
-        _title = t;
+    void update() {
+        r.render();
     }
 
-    void EngineUpdate() {
+   private:
+    Rect r;
+};
+
+class Game {
+   public:
+    Game() : active_world(new World()) {}
+
+    void set_title(std::string t) {
+        title = t;
+    }
+
+    void set_world(World* world) {
+        active_world.reset(world);
+    }
+
+    void engine_update() {
         // Trying to render a rectangle at (10, 10) with a width & height of 10
-
-        Rect r{{100.0f, 100.0f}, {100.0f, 100.0f}};
-        r.Render();
+        active_world->update();
     }
 
-    void Start() {
+    std::pair<int, int> get_window_size() {
+        GLFWwindow* window = glfwGetCurrentContext();
+        int width, height;
+        glfwGetWindowSize(window, &width, &height);
+        return std::make_pair(width, height);
+    }
+
+    void start() {
         GLFWwindow* window;
 
         /* Initialize the library */
@@ -33,7 +55,7 @@ class Window {
         // Create a windowed mode window and its OpenGL context
         // I don't like how I set the title, pass in the config item, but keep
         // the config options maybe?
-        window = glfwCreateWindow(640, 480, _title.c_str(), NULL, NULL);
+        window = glfwCreateWindow(640, 480, title.c_str(), NULL, NULL);
         if (!window) {
             glfwTerminate();
             return;
@@ -61,7 +83,7 @@ class Window {
             glClear(GL_COLOR_BUFFER_BIT);
 
             // update loop
-            EngineUpdate();
+            engine_update();
 
             /* Swap front and back buffers */
             glfwSwapBuffers(window);
@@ -74,7 +96,8 @@ class Window {
     }
 
    private:
-    std::string _title;
+    std::unique_ptr<World> active_world;
+    std::string title;
 };
 }  // namespace kafei
 

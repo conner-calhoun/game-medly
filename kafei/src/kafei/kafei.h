@@ -2,8 +2,8 @@
 #define KAFEI_H
 
 #include "config.h"
+#include "game.h"
 #include "string"
-#include "window.h"
 
 /**
  * My idea for this is that the Kafei class is a builder that can build most things,
@@ -14,7 +14,7 @@ namespace kafei {
 
 class Kafei {
    public:
-    Kafei() : win(), cfg(){};
+    Kafei() : game(), cfg(){};
 
     void load(Config& cfg) {
         this->cfg = cfg;
@@ -22,7 +22,7 @@ class Kafei {
 
     void start() {
         load_config();
-        win.Start();
+        game.start();
     }
 
     Config build_config(const std::string& window_title) {
@@ -31,12 +31,20 @@ class Kafei {
         return cfg;
     }
 
-   private:
-    void load_config() {
-        win.SetTitle(cfg.get_title());
+    World* build_world() {
+        return new World();
     }
 
-    Window win;
+    void set_world(World* world) {
+        game.set_world(world);
+    }
+
+   private:
+    void load_config() {
+        game.set_title(cfg.get_title());
+    }
+
+    Game game;
     Config cfg;
 };
 }  // namespace kafei
