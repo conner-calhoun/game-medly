@@ -12,8 +12,9 @@
 namespace kafei {
 
 class Shader {
-   public:
+  public:
     uint ID;
+
     Shader(const std::string& vert_path, const std::string& frag_path) {
         // 1. retrieve the vertex/fragment source code from filePath
         std::string vert_code;
@@ -61,7 +62,7 @@ class Shader {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), val);
     }
 
-   private:
+  private:
     bool compile_shaders(const char* vert_code, const char* frag_code) {
         bool success = true;
 
@@ -121,6 +122,6 @@ class Shader {
     }
 };
 
-}  // namespace kafei
+} // namespace kafei
 
-#endif  // SHADER_H
+#endif // SHADER_H

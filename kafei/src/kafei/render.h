@@ -6,6 +6,9 @@
 #include <glad/glad.h>
 #include <typedefs.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb/stb_image.h>
+
 #include <iostream>
 #include <memory>
 #include <tuple>
@@ -22,6 +25,19 @@ struct Vec2 {
     float x, y;
 };
 
+class Texture {
+    /**
+     * NOTE: texPath will be relative to the resources folder
+     */
+    Texture(const std::string& texPath) {
+        auto& res = ResourceManager::GetInstance();
+        auto fullPath = res->Get(texPath);
+
+        int width, height, nrChannels;
+        unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &nrChannels, 0);
+    }
+};
+
 struct Tri {
     Vec2 left;
     Vec2 right;
@@ -34,9 +50,9 @@ struct Tri {
     std::vector<float> to_vertices() {
         // TODO: convert pixel coords to OpenGL coords
         return {
-            left.x,  left.y,  0.0f,  // Left Point
-            right.x, right.y, 0.0f,  // Right Point
-            top.x,   top.y,   0.0f   // Top Point
+            left.x,  left.y,  0.0f, // Left Point
+            right.x, right.y, 0.0f, // Right Point
+            top.x,   top.y,   0.0f  // Top Point
         };
     }
 
@@ -60,8 +76,8 @@ struct Rect {
     Vec2 pos, size;
     unsigned int indices[6] = {
         // note that we start from 0!
-        0, 1, 3,  // first triangle
-        1, 2, 3   // second triangle
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
     };
 
     Rect(Vec2 pos, Vec2 size) : pos(pos), size(size) {}
@@ -69,10 +85,10 @@ struct Rect {
     std::vector<float> to_vertices() {
         // TODO: convert pixel coords to OpenGL coords
         return {
-            0.5f,  0.5f,  0.0f,  // top right
-            0.5f,  -0.5f, 0.0f,  // bottom right
-            -0.5f, -0.5f, 0.0f,  // bottom left
-            -0.5f, 0.5f,  0.0f   // top left
+            0.5f,  0.5f,  0.0f, // top right
+            0.5f,  -0.5f, 0.0f, // bottom right
+            -0.5f, -0.5f, 0.0f, // bottom left
+            -0.5f, 0.5f,  0.0f  // top left
         };
     }
 
@@ -111,6 +127,6 @@ struct Rect {
     }
 };
 
-}  // namespace kafei
+} // namespace kafei
 
-#endif  // KAFEI_RENDERER_H
+#endif // KAFEI_RENDERER_H

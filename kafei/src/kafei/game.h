@@ -3,6 +3,7 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
+#include <ResourceManager.h>
 #include <glad/glad.h>
 #include <render.h>
 #include <shader.h>
@@ -11,19 +12,19 @@ namespace kafei {
 
 /// TODO: Have the Kafei class build a world and add entities to the world
 class World {
-   public:
+  public:
     World() : r({100.0f, 100.0f}, {100.0f, 100.0f}) {}
 
     void update() {
         r.render();
     }
 
-   private:
+  private:
     Rect r;
 };
 
 class Game {
-   public:
+  public:
     Game() : active_world(new World()) {}
 
     void set_title(std::string t) {
@@ -50,7 +51,8 @@ class Game {
         GLFWwindow* window;
 
         /* Initialize the library */
-        if (!glfwInit()) return;
+        if (!glfwInit())
+            return;
 
         // Create a windowed mode window and its OpenGL context
         // I don't like how I set the title, pass in the config item, but keep
@@ -70,10 +72,14 @@ class Game {
             return;
         }
 
+        // Setup resource manager
+        auto& res = ResourceManager::GetInstance();
+        res->SetResPath("res");
+
         // Create the default shader
         // TODO: Use a resource manager class to handle paths, possibly with an ENV_VAR
         // KAFEI_RESOURCE_PATH or something like that.
-        Shader def_shader{"res/shaders/default.vert", "res/shaders/default.frag"};
+        Shader def_shader{res->Get("shaders/default.vert"), res->Get("shaders/default.frag")};
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
@@ -95,10 +101,10 @@ class Game {
         glfwTerminate();
     }
 
-   private:
+  private:
     std::unique_ptr<World> active_world;
     std::string title;
 };
-}  // namespace kafei
+} // namespace kafei
 
-#endif  // KAFEI_WINDOW_H
+#endif // KAFEI_WINDOW_H
