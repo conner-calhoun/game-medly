@@ -13,7 +13,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/src/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 
 set(SRCS
-    src/kafei/ResourceManager.cpp)
+    src/kafei/util/ResourceManager.cpp)
 
 set(DEP_SRCS
     deps/glad/src/glad.c)
@@ -23,6 +23,7 @@ add_library(${PROJECT_NAME} ${SRCS} ${DEP_SRCS})
 target_include_directories(${PROJECT_NAME}
 PUBLIC
     src/kafei
+    src/kafei/util
 
     # GLAD Includes
     deps/glad/include

@@ -4,6 +4,7 @@
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <shader.h>
 #include <typedefs.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -26,16 +27,36 @@ struct Vec2 {
 };
 
 class Texture {
+  public:
     /**
      * NOTE: texPath will be relative to the resources folder
      */
     Texture(const std::string& texPath) {
-        auto& res = ResourceManager::GetInstance();
-        auto fullPath = res->Get(texPath);
+        auto fullPath = Res::GetInstance()->Get(texPath);
+
+        glGenTextures(1, &texture);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        // set the texture wrapping/filtering options (on the currently bound texture object)
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
         int width, height, nrChannels;
+        stbi_set_flip_vertically_on_load(true);
         unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &nrChannels, 0);
+        if (data) {
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+            glGenerateMipmap(GL_TEXTURE_2D);
+        } else {
+            std::cout << "Failed to load texture" << std::endl;
+        }
+        stbi_image_free(data);
     }
+
+    uint texture;
 };
 
 struct Tri {
@@ -56,16 +77,32 @@ struct Tri {
         };
     }
 
+    std::vector<float> GetTexCoords() {
+        return {
+            // texture coords
+            1.0f, 1.0f, // top right
+            1.0f, 0.0f, // bottom right
+            0.0f, 0.0f, // bottom left
+            0.0f, 1.0f  // top left
+        };
+    }
+
     void render() {
         std::vector<float> vertices = to_vertices();
+        std::vector<float> texCoords = GetTexCoords();
 
         uint VBO;
         glGenBuffers(1, &VBO);
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
 
+        // position attrib
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
+
+        // texture coord attribute
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(2);
 
         // draw the triangle
         glDrawArrays(GL_TRIANGLES, 0, 3);
@@ -92,9 +129,31 @@ struct Rect {
         };
     }
 
+    std::vector<float> GetTexCoords() {
+        return {
+            // texture coords
+            1.0f, 1.0f, // top right
+            1.0f, 0.0f, // bottom right
+            0.0f, 0.0f, // bottom left
+            0.0f, 1.0f  // top left
+        };
+    }
+
+    void SetShader(const std::string& vPath, const std::string& fPath) {
+        shader.reset(new Shader(vPath, fPath));
+    }
+
+    void SetTexture(const std::string texPath) {
+        texture.reset(new Texture{texPath});
+    }
+
     void render() {
+        shader->use();
+        shader->set_int("texture", texture->texture);
+
         // TODO: Move to init
-        std::vector<float> vertices = to_vertices();
+        auto vertices = to_vertices();
+        auto texVerts = GetTexCoords();
 
         // Vertex array object
         uint VAO;
@@ -118,6 +177,17 @@ struct Rect {
         glEnableVertexAttribArray(0);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+
+        // Texture Stuff
+        uint TVBO;
+        glGenBuffers(1, &TVBO);
+        glBindBuffer(GL_ARRAY_BUFFER, TVBO);
+        glBufferData(GL_ARRAY_BUFFER, texVerts.size() * sizeof(float), &texVerts.front(), GL_STATIC_DRAW);
+
+        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+        glEnableVertexAttribArray(2);
+        // End texture stuff
+
         // End init section
 
         // Render Loop
@@ -125,6 +195,9 @@ struct Rect {
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
     }
+
+    std::unique_ptr<Texture> texture;
+    std::unique_ptr<Shader> shader;
 };
 
 } // namespace kafei

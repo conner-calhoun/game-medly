@@ -15,6 +15,12 @@ class World {
   public:
     World() : r({100.0f, 100.0f}, {100.0f, 100.0f}) {}
 
+    void init() {
+        // TODO Set default shader
+        r.SetShader("res/shaders/default.vert", "res/shaders/default.frag");
+        r.SetTexture("c++.png");
+    }
+
     void update() {
         r.render();
     }
@@ -73,13 +79,15 @@ class Game {
         }
 
         // Setup resource manager
-        auto& res = ResourceManager::GetInstance();
+        auto& res = Res::GetInstance();
         res->SetResPath("res");
 
         // Create the default shader
         // TODO: Use a resource manager class to handle paths, possibly with an ENV_VAR
         // KAFEI_RESOURCE_PATH or something like that.
         Shader def_shader{res->Get("shaders/default.vert"), res->Get("shaders/default.frag")};
+
+        active_world->init();
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {

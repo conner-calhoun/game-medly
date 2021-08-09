@@ -6,11 +6,11 @@
 
 namespace kafei {
 
-class ResourceManager {
+class Res {
   public:
-    static std::unique_ptr<ResourceManager>& GetInstance();
+    static std::unique_ptr<Res>& GetInstance();
 
-    ~ResourceManager() = default;
+    ~Res() = default;
 
     void SetResPath(const std::string resFolderPath) {
         resPath = resFolderPath;
@@ -22,9 +22,9 @@ class ResourceManager {
     }
 
   private:
-    ResourceManager() {}
+    Res() {}
 
-    static std::unique_ptr<ResourceManager> instance;
+    static std::unique_ptr<Res> instance;
 
     std::string resPath;
 };
