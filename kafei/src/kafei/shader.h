@@ -14,7 +14,7 @@ namespace kafei {
 
 class Shader {
   public:
-    uint ID;
+    uint id;
 
     Shader(const std::string& vert_path, const std::string& frag_path) {
         // 1. retrieve the vertex/fragment source code from filePath
@@ -48,19 +48,19 @@ class Shader {
     }
 
     void use() {
-        glUseProgram(ID);
+        glUseProgram(id);
     }
 
     void set_bool(const std::string& name, bool val) const {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), (int)val);
+        glUniform1i(glGetUniformLocation(id, name.c_str()), (int)val);
     }
 
     void set_int(const std::string& name, int val) const {
-        glUniform1i(glGetUniformLocation(ID, name.c_str()), val);
+        glUniform1i(glGetUniformLocation(id, name.c_str()), val);
     }
 
     void set_float(const std::string& name, float val) const {
-        glUniform1f(glGetUniformLocation(ID, name.c_str()), val);
+        glUniform1f(glGetUniformLocation(id, name.c_str()), val);
     }
 
   private:
@@ -83,11 +83,11 @@ class Shader {
 
         success &= check_compilation(frag_shader);
 
-        ID = glCreateProgram();
+        id = glCreateProgram();
 
-        glAttachShader(ID, vert_shader);
-        glAttachShader(ID, frag_shader);
-        glLinkProgram(ID);
+        glAttachShader(id, vert_shader);
+        glAttachShader(id, frag_shader);
+        glLinkProgram(id);
 
         success &= check_linking();
 
@@ -114,9 +114,9 @@ class Shader {
         int success;
         char info_log[512];
 
-        glGetProgramiv(ID, GL_LINK_STATUS, &success);
+        glGetProgramiv(id, GL_LINK_STATUS, &success);
         if (!success) {
-            glGetProgramInfoLog(ID, 512, NULL, info_log);
+            glGetProgramInfoLog(id, 512, NULL, info_log);
             std::cout << "ERROR::SHADER::LINKING FAILED\n" << info_log << std::endl;
         }
 

@@ -5,8 +5,8 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#include <ResourceManager.h>
 #include <quad.h>
+#include <resource_manager.h>
 #include <shader.h>
 
 namespace kafei {
@@ -18,8 +18,8 @@ class World {
 
     void init() {
         // TODO Set default shader
-        auto& res = Res::GetInstance();
-        q.set_shader(res->Get("shaders/default.vert"), res->Get("shaders/default.frag"));
+        auto& res = Res::get_instance();
+        q.set_shader(res->get("shaders/default.vert"), res->get("shaders/default.frag"));
         q.set_texture("c++.png");
 
         q.init();
@@ -83,13 +83,13 @@ class Game {
         }
 
         // Setup resource manager
-        auto& res = Res::GetInstance();
-        res->SetResPath("res");
+        auto& res = Res::get_instance();
+        res->set_res_path("res");
 
         // Create the default shader
         // TODO: Use a resource manager class to handle paths, possibly with an ENV_VAR
         // KAFEI_RESOURCE_PATH or something like that.
-        Shader def_shader{res->Get("shaders/default.vert"), res->Get("shaders/default.frag")};
+        Shader default_shader{res->get("shaders/default.vert"), res->get("shaders/default.frag")};
 
         // Setup everything else before the active world
         // TODO: pass in the starting world
@@ -99,7 +99,7 @@ class Game {
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
-            def_shader.use();
+            default_shader.use();
 
             /* Render here */
             glClear(GL_COLOR_BUFFER_BIT);

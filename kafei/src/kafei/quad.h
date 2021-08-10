@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include <Common.h>
-#include <Texture.h>
+#include <common.h>
 #include <shader.h>
+#include <texture.h>
 
 namespace kafei {
 
@@ -13,7 +13,7 @@ class Quad {
   public:
     Quad(Vec2 pos, Vec2 size) : pos(pos), size(size) {}
 
-    std::vector<float> to_vertices() {
+    std::vector<float> to_verts() {
         // TODO: convert pixel coords to OpenGL coords
         return {
             0.5f,  0.5f,  0.0f, // top right
@@ -27,13 +27,12 @@ class Quad {
         shader.reset(new Shader(v_path, f_path));
     }
 
-    void set_texture(const std::string tex_path) {
-        texture.reset(new Texture{tex_path});
+    void set_texture(const std::string text_path) {
+        texture.reset(new Texture{text_path});
     }
 
     void init() {
-        // TODO: Move to init
-        auto vertices = to_vertices();
+        auto vertices = to_verts();
 
         // Vertex array object
         glGenBuffers(1, &VAO);
@@ -59,7 +58,7 @@ class Quad {
 
         // Texture Stuff
         if (texture) {
-            texture->Load();
+            texture->load();
 
             uint TVBO;
             glGenBuffers(1, &TVBO);
@@ -74,7 +73,7 @@ class Quad {
     void render() {
         if (shader) {
             shader->use();
-            shader->set_int("texture", texture->GetTexture());
+            shader->set_int("texture", texture->get_texture());
         }
 
         // Render Loop

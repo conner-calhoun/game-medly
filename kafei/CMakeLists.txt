@@ -17,7 +17,7 @@ add_subdirectory(${CMAKE_CURRENT_LIST_DIR}/deps/glfw)
 file(COPY ${CMAKE_CURRENT_LIST_DIR}/src/res DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/Debug)
 
 set(SRCS
-    src/kafei/util/ResourceManager.cpp)
+    src/kafei/util/resource_manager.cpp)
 
 set(DEP_SRCS
     deps/glad/src/glad.c)

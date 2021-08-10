@@ -5,9 +5,9 @@
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 
-#include <ResourceManager.h>
 #include <common.h>
 #include <glad/glad.h>
+#include <resource_manager.h>
 #include <shader.h>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -25,9 +25,9 @@ class Texture {
     /**
      * NOTE: texPath will be relative to the resources folder
      */
-    Texture(const std::string& textPath) : path(Res::GetInstance()->Get(textPath)) {}
+    Texture(const std::string& text_path) : path(Res::get_instance()->get(text_path)) {}
 
-    void Load() {
+    void load() {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -38,9 +38,9 @@ class Texture {
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-        int width, height, nrChannels;
+        int width, height, nr_chans;
         stbi_set_flip_vertically_on_load(true);
-        uchar* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
+        uchar* data = stbi_load(path.c_str(), &width, &height, &nr_chans, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -50,7 +50,7 @@ class Texture {
         stbi_image_free(data);
     }
 
-    uint GetTexture() {
+    uint get_texture() {
         return texture;
     }
 
