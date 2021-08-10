@@ -31,9 +31,9 @@ class Texture {
     /**
      * NOTE: texPath will be relative to the resources folder
      */
-    Texture(const std::string& texPath) {
-        auto fullPath = Res::GetInstance()->Get(texPath);
+    Texture(const std::string& texPath) : path(Res::GetInstance()->Get(texPath)) {}
 
+    void Load() {
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -46,7 +46,7 @@ class Texture {
 
         int width, height, nrChannels;
         stbi_set_flip_vertically_on_load(true);
-        unsigned char* data = stbi_load(fullPath.c_str(), &width, &height, &nrChannels, 0);
+        uchar* data = stbi_load(path.c_str(), &width, &height, &nrChannels, 0);
         if (data) {
             glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
             glGenerateMipmap(GL_TEXTURE_2D);
@@ -56,67 +56,17 @@ class Texture {
         stbi_image_free(data);
     }
 
+    uint GetTexture() {
+        return texture;
+    }
+
+  private:
     uint texture;
+    std::string path;
 };
 
-struct Tri {
-    Vec2 left;
-    Vec2 right;
-    Vec2 top;
-
-    Tri() {}
-
-    Tri(Vec2 left, Vec2 right, Vec2 top) : left(left), right(right), top(top) {}
-
-    std::vector<float> to_vertices() {
-        // TODO: convert pixel coords to OpenGL coords
-        return {
-            left.x,  left.y,  0.0f, // Left Point
-            right.x, right.y, 0.0f, // Right Point
-            top.x,   top.y,   0.0f  // Top Point
-        };
-    }
-
-    std::vector<float> GetTexCoords() {
-        return {
-            // texture coords
-            1.0f, 1.0f, // top right
-            1.0f, 0.0f, // bottom right
-            0.0f, 0.0f, // bottom left
-            0.0f, 1.0f  // top left
-        };
-    }
-
-    void render() {
-        std::vector<float> vertices = to_vertices();
-        std::vector<float> texCoords = GetTexCoords();
-
-        uint VBO;
-        glGenBuffers(1, &VBO);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO);
-        glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(float), &vertices.front(), GL_STATIC_DRAW);
-
-        // position attrib
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(0);
-
-        // texture coord attribute
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(2);
-
-        // draw the triangle
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-    }
-};
-
-struct Rect {
-    Vec2 pos, size;
-    unsigned int indices[6] = {
-        // note that we start from 0!
-        0, 1, 3, // first triangle
-        1, 2, 3  // second triangle
-    };
-
+class Rect {
+  public:
     Rect(Vec2 pos, Vec2 size) : pos(pos), size(size) {}
 
     std::vector<float> to_vertices() {
@@ -129,16 +79,6 @@ struct Rect {
         };
     }
 
-    std::vector<float> GetTexCoords() {
-        return {
-            // texture coords
-            1.0f, 1.0f, // top right
-            1.0f, 0.0f, // bottom right
-            0.0f, 0.0f, // bottom left
-            0.0f, 1.0f  // top left
-        };
-    }
-
     void SetShader(const std::string& vPath, const std::string& fPath) {
         shader.reset(new Shader(vPath, fPath));
     }
@@ -147,16 +87,11 @@ struct Rect {
         texture.reset(new Texture{texPath});
     }
 
-    void render() {
-        shader->use();
-        shader->set_int("texture", texture->texture);
-
+    void Init() {
         // TODO: Move to init
         auto vertices = to_vertices();
-        auto texVerts = GetTexCoords();
 
         // Vertex array object
-        uint VAO;
         glGenBuffers(1, &VAO);
         glBindVertexArray(VAO);
 
@@ -179,16 +114,24 @@ struct Rect {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 
         // Texture Stuff
-        uint TVBO;
-        glGenBuffers(1, &TVBO);
-        glBindBuffer(GL_ARRAY_BUFFER, TVBO);
-        glBufferData(GL_ARRAY_BUFFER, texVerts.size() * sizeof(float), &texVerts.front(), GL_STATIC_DRAW);
+        if (texture) {
+            texture->Load();
 
-        glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
-        glEnableVertexAttribArray(2);
-        // End texture stuff
+            uint TVBO;
+            glGenBuffers(1, &TVBO);
+            glBindBuffer(GL_ARRAY_BUFFER, TVBO);
+            glBufferData(GL_ARRAY_BUFFER, textCoords.size() * sizeof(float), &textCoords.front(), GL_STATIC_DRAW);
 
-        // End init section
+            glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
+            glEnableVertexAttribArray(2);
+        }
+    }
+
+    void Render() {
+        if (shader) {
+            shader->use();
+            shader->set_int("texture", texture->GetTexture());
+        }
 
         // Render Loop
         glBindVertexArray(VAO);
@@ -196,6 +139,22 @@ struct Rect {
         glBindVertexArray(0);
     }
 
+  private:
+    uint indices[6] = {
+        // note that we start from 0!
+        0, 1, 3, // first triangle
+        1, 2, 3  // second triangle
+    };
+
+    std::vector<float> textCoords = {
+        1.0f, 1.0f, // top right
+        1.0f, 0.0f, // bottom right
+        0.0f, 0.0f, // bottom left
+        0.0f, 1.0f  // top left
+    };
+
+    uint VAO;
+    Vec2 pos, size;
     std::unique_ptr<Texture> texture;
     std::unique_ptr<Shader> shader;
 };

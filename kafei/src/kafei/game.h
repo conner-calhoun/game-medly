@@ -17,12 +17,15 @@ class World {
 
     void init() {
         // TODO Set default shader
-        r.SetShader("res/shaders/default.vert", "res/shaders/default.frag");
+        auto& res = Res::GetInstance();
+        r.SetShader(res->Get("shaders/default.vert"), res->Get("shaders/default.frag"));
         r.SetTexture("c++.png");
+
+        r.Init();
     }
 
     void update() {
-        r.render();
+        r.Render();
     }
 
   private:
@@ -31,7 +34,7 @@ class World {
 
 class Game {
   public:
-    Game() : active_world(new World()) {}
+    Game() {}
 
     void set_title(std::string t) {
         title = t;
@@ -86,6 +89,10 @@ class Game {
         // TODO: Use a resource manager class to handle paths, possibly with an ENV_VAR
         // KAFEI_RESOURCE_PATH or something like that.
         Shader def_shader{res->Get("shaders/default.vert"), res->Get("shaders/default.frag")};
+
+        // Setup everything else before the active world
+        // TODO: pass in the starting world
+        set_world(new World());
 
         active_world->init();
 
