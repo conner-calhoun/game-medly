@@ -1,19 +1,19 @@
 #ifndef KAFEI_H
 #define KAFEI_H
 
-#include "config.h"
-#include "game.h"
-#include "string"
+#include <config.h>
+#include <game.h>
+
+#include <iostream>
 
 /**
- * My idea for this is that the Kafei class is a builder that can build most things,
- * and is the entry point to the API.
+ * TODO: Eliminate this class
  */
 
 namespace kafei {
 
 class Kafei {
-   public:
+  public:
     Kafei() : game(), cfg(){};
 
     void load(Config& cfg) {
@@ -39,7 +39,7 @@ class Kafei {
         game.set_world(world);
     }
 
-   private:
+  private:
     void load_config() {
         game.set_title(cfg.get_title());
     }
@@ -47,6 +47,6 @@ class Kafei {
     Game game;
     Config cfg;
 };
-}  // namespace kafei
+} // namespace kafei
 
-#endif  // KAFEI_H
+#endif // KAFEI_H

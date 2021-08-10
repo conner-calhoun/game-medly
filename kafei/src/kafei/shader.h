@@ -2,7 +2,8 @@
 #define SHADER_H
 
 #include <glad/glad.h>
-#include <typedefs.h>
+
+#include <common.h>
 
 #include <fstream>
 #include <iostream>
@@ -67,31 +68,31 @@ class Shader {
         bool success = true;
 
         // compile vert shader
-        uint vertex_shader;
-        vertex_shader = glCreateShader(GL_VERTEX_SHADER);
-        glShaderSource(vertex_shader, 1, &vert_code, NULL);
-        glCompileShader(vertex_shader);
+        uint vert_shader;
+        vert_shader = glCreateShader(GL_VERTEX_SHADER);
+        glShaderSource(vert_shader, 1, &vert_code, NULL);
+        glCompileShader(vert_shader);
 
         // check shader compilation
-        success &= check_compilation(vertex_shader);
+        success &= check_compilation(vert_shader);
 
-        uint fragment_shader;
-        fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
-        glShaderSource(fragment_shader, 1, &frag_code, NULL);
-        glCompileShader(fragment_shader);
+        uint frag_shader;
+        frag_shader = glCreateShader(GL_FRAGMENT_SHADER);
+        glShaderSource(frag_shader, 1, &frag_code, NULL);
+        glCompileShader(frag_shader);
 
-        success &= check_compilation(fragment_shader);
+        success &= check_compilation(frag_shader);
 
         ID = glCreateProgram();
 
-        glAttachShader(ID, vertex_shader);
-        glAttachShader(ID, fragment_shader);
+        glAttachShader(ID, vert_shader);
+        glAttachShader(ID, frag_shader);
         glLinkProgram(ID);
 
         success &= check_linking();
 
-        glDeleteShader(vertex_shader);
-        glDeleteShader(fragment_shader);
+        glDeleteShader(vert_shader);
+        glDeleteShader(frag_shader);
 
         return success;
     }
@@ -116,6 +117,7 @@ class Shader {
         glGetProgramiv(ID, GL_LINK_STATUS, &success);
         if (!success) {
             glGetProgramInfoLog(ID, 512, NULL, info_log);
+            std::cout << "ERROR::SHADER::LINKING FAILED\n" << info_log << std::endl;
         }
 
         return success;

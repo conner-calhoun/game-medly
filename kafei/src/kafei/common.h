@@ -1,11 +1,15 @@
-#ifndef TYPEDEFS_H
-#define TYPEDEFS_H
+#ifndef COMMON_H
+#define COMMON_H
 
 namespace kafei {
+
+struct Vec2 {
+    float x, y;
+};
 
 typedef unsigned int uint;
 typedef unsigned char uchar;
 
 } // namespace kafei
 
-#endif // TYPEDEFS_H
+#endif // COMMON_H

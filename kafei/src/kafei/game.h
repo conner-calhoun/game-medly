@@ -3,9 +3,10 @@
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
-#include <ResourceManager.h>
 #include <glad/glad.h>
-#include <render.h>
+
+#include <ResourceManager.h>
+#include <quad.h>
 #include <shader.h>
 
 namespace kafei {
@@ -13,23 +14,23 @@ namespace kafei {
 /// TODO: Have the Kafei class build a world and add entities to the world
 class World {
   public:
-    World() : r({100.0f, 100.0f}, {100.0f, 100.0f}) {}
+    World() : q({100.0f, 100.0f}, {100.0f, 100.0f}) {}
 
     void init() {
         // TODO Set default shader
         auto& res = Res::GetInstance();
-        r.SetShader(res->Get("shaders/default.vert"), res->Get("shaders/default.frag"));
-        r.SetTexture("c++.png");
+        q.set_shader(res->Get("shaders/default.vert"), res->Get("shaders/default.frag"));
+        q.set_texture("c++.png");
 
-        r.Init();
+        q.init();
     }
 
     void update() {
-        r.Render();
+        q.render();
     }
 
   private:
-    Rect r;
+    Quad q;
 };
 
 class Game {
@@ -56,7 +57,7 @@ class Game {
         return std::make_pair(width, height);
     }
 
-    void start() {
+    virtual void start() final {
         GLFWwindow* window;
 
         /* Initialize the library */
