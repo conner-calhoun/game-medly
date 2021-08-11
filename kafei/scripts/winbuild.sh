@@ -9,4 +9,9 @@ fi
 
 cd build
 cmake ..
-MSBuild.exe kafei.sln
+
+if [[ $1 == "-r " ]]; then
+    config="/property:Configuration=Release"
+fi
+
+MSBuild.exe kafei.sln $config
