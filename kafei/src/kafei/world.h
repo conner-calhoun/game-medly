@@ -10,23 +10,17 @@ namespace kafei {
  */
 class World {
   public:
-    World() : q({100.0f, 100.0f}, {100.0f, 100.0f}) {}
+    World() {}
 
-    void init() {
-        // TODO Set default shader
-        auto& res = Res::get_instance();
-        q.set_shader(res->get("shaders/default.vert"), res->get("shaders/default.frag"));
-        q.set_texture("c++.png");
-
-        q.init();
+    virtual void init() {
+        std::cout << "Base World Init" << std::endl;
     }
 
-    void update() {
-        q.render();
+    virtual void update() {
+        std::cout << "Base World Update" << std::endl;
     }
 
   private:
-    Quad q;
 };
 
 } // namespace kafei

@@ -22,8 +22,19 @@ class Game {
     }
 
     void engine_update() {
-        // Trying to render a rectangle at (10, 10) with a width & height of 10
         wm.update();
+    }
+
+    void load_config(Config& cfg) {
+        set_title(cfg.get_title());
+    }
+
+    void set_world(World* world) {
+        wm.set_world(world);
+    }
+
+    void set_default_world(World* world) {
+        wm.set_default_world(world);
     }
 
     std::pair<int, int> get_window_size() {
@@ -67,9 +78,8 @@ class Game {
         // KAFEI_RESOURCE_PATH or something like that.
         Shader default_shader{res->get("shaders/default.vert"), res->get("shaders/default.frag")};
 
-        // Setup everything else before the active world
-        // TODO: pass in the starting world
-        wm.set_world(new World());
+        // Setup everything else before 'initing' the default world
+        wm.init();
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
@@ -94,6 +104,7 @@ class Game {
   private:
     WorldManager wm;
     std::string title;
+    bool setup;
 };
 } // namespace kafei
 
