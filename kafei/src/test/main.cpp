@@ -24,6 +24,5 @@ int main(char argc, char** argv) {
      * kaf.SetDefaultWorld("WorldName");
      */
 
-    kaf.set_world(kaf.build_world());
     kaf.start();
 }

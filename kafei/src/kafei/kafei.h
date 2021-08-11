@@ -35,10 +35,6 @@ class Kafei {
         return new World();
     }
 
-    void set_world(World* world) {
-        game.set_world(world);
-    }
-
   private:
     void load_config() {
         game.set_title(cfg.get_title());

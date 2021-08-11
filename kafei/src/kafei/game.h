@@ -8,46 +8,22 @@
 #include <quad.h>
 #include <resource_manager.h>
 #include <shader.h>
+#include <world.h>
+#include <world_manager.h>
 
 namespace kafei {
 
-/// TODO: Have the Kafei class build a world and add entities to the world
-class World {
-  public:
-    World() : q({100.0f, 100.0f}, {100.0f, 100.0f}) {}
-
-    void init() {
-        // TODO Set default shader
-        auto& res = Res::get_instance();
-        q.set_shader(res->get("shaders/default.vert"), res->get("shaders/default.frag"));
-        q.set_texture("c++.png");
-
-        q.init();
-    }
-
-    void update() {
-        q.render();
-    }
-
-  private:
-    Quad q;
-};
-
 class Game {
   public:
-    Game() {}
+    Game() : wm() {}
 
     void set_title(std::string t) {
         title = t;
     }
 
-    void set_world(World* world) {
-        active_world.reset(world);
-    }
-
     void engine_update() {
         // Trying to render a rectangle at (10, 10) with a width & height of 10
-        active_world->update();
+        wm.update();
     }
 
     std::pair<int, int> get_window_size() {
@@ -93,9 +69,7 @@ class Game {
 
         // Setup everything else before the active world
         // TODO: pass in the starting world
-        set_world(new World());
-
-        active_world->init();
+        wm.set_world(new World());
 
         /* Loop until the user closes the window */
         while (!glfwWindowShouldClose(window)) {
@@ -118,7 +92,7 @@ class Game {
     }
 
   private:
-    std::unique_ptr<World> active_world;
+    WorldManager wm;
     std::string title;
 };
 } // namespace kafei
