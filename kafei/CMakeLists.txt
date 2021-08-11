@@ -27,6 +27,7 @@ add_library(${PROJECT_NAME} ${SRCS} ${DEP_SRCS})
 target_include_directories(${PROJECT_NAME}
 PUBLIC
     src/kafei
+    src/kafei/render
     src/kafei/util
 
     # GLAD Includes
