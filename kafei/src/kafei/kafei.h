@@ -3,6 +3,7 @@
 
 #include <config.h>
 #include <game.h>
+#include <kafgl.h>
 #include <quad.h>
 #include <resource_manager.h>
 

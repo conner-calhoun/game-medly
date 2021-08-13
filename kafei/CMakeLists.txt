@@ -33,10 +33,7 @@ PUBLIC
     # GLAD Includes
     deps/glad/include
 
-    # STB
-    deps/stb/
-
-    # GLM
+    # Deps
     deps/
 )
 

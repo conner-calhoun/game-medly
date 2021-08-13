@@ -7,23 +7,38 @@
 
 class TestWorld : public kafei::World {
   public:
-    TestWorld() : q({100.0f, 100.0f}, {100.0f, 100.0f}) {}
+    // TestWorld() : q({100.0f, 100.0f}, {100.0f, 100.0f}) {}
+    TestWorld() : kgl() {}
 
     void init() override {
         // TODO Set default shader
-        auto& res = kafei::Res::get_instance();
-        q.set_shader(res->get("shaders/default.vert"), res->get("shaders/default.frag"));
-        q.set_texture("c++.png");
+        // auto& res = kafei::Res::get_instance();
+        // q.set_shader(res->get("shaders/texture.vert"), res->get("shaders/texture.frag"));
+        // q.set_texture("c++.png");
 
-        q.init();
+        // q.init();
+        kgl.init();
+
+        kafei::KglVertex left;
+        left.pos = glm::vec3(0.5f, -0.5f, 0.0f);
+        kafei::KglVertex right;
+        right.pos = glm::vec3(0.0f, 0.5f, 0.0f);
+        kafei::KglVertex top;
+        top.pos = glm::vec3(-0.5f, -0.5f, 0.0f);
+
+        kgl.vertices.emplace_back(left);
+        kgl.vertices.emplace_back(right);
+        kgl.vertices.emplace_back(top);
     }
 
     void update() override {
-        q.render();
+        // q.render();
+        kgl.update();
     }
 
   private:
-    kafei::Quad q;
+    // kafei::Quad q;
+    kafei::Kgl kgl;
 };
 
 class MyGame : public kafei::Game {
