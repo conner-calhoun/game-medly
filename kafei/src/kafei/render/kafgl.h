@@ -14,6 +14,12 @@ struct KglVertex {
     glm::vec2 tex;
     glm::vec3 color;
     glm::vec3 pos;
+
+    static KglVertex pos_vert(float x, float y, float z) {
+        KglVertex vert;
+        vert.pos = glm::vec3(x, y, z);
+        return vert;
+    }
 };
 
 struct Kgl {

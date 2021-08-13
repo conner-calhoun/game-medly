@@ -19,16 +19,9 @@ class TestWorld : public kafei::World {
         // q.init();
         kgl.init();
 
-        kafei::KglVertex left;
-        left.pos = glm::vec3(0.5f, -0.5f, 0.0f);
-        kafei::KglVertex right;
-        right.pos = glm::vec3(0.0f, 0.5f, 0.0f);
-        kafei::KglVertex top;
-        top.pos = glm::vec3(-0.5f, -0.5f, 0.0f);
-
-        kgl.vertices.emplace_back(left);
-        kgl.vertices.emplace_back(right);
-        kgl.vertices.emplace_back(top);
+        kgl.vertices.emplace_back(kafei::KglVertex::pos_vert(0.5f, -0.5f, 0.0f));
+        kgl.vertices.emplace_back(kafei::KglVertex::pos_vert(0.0f, 0.5f, 0.0f));
+        kgl.vertices.emplace_back(kafei::KglVertex::pos_vert(-0.5f, -0.5f, 0.0f));
     }
 
     void update() override {
